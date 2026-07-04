@@ -1,77 +1,52 @@
-import { CheckCircle2, Loader2 } from "lucide-react";
+import { Loader2, Sparkles } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
-  DialogClose,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
 import { LABELS } from "@/constants/labels";
-import { AI_STEPS } from "@/constants/planner/mock";
-import { cn } from "@/lib/utils";
 
-import type { AiStep } from "@/types/planner";
-
-const DIALOG = LABELS.PLANNER.DIALOG;
+const DIALOG = LABELS.PLANNER.GENERATE_DIALOG;
 
 interface GenerateSprintDialogProps {
   open: boolean;
+  /** True while the async generation kickoff / sprint polling is in flight. */
+  isGenerating: boolean;
+  onConfirm: () => void;
   onOpenChange: (open: boolean) => void;
 }
 
-function StepRow({ step }: { step: AiStep }) {
-  return (
-    <li className="flex items-center gap-3">
-      {step.status === "done" && (
-        <CheckCircle2
-          className="h-5 w-5 shrink-0 text-emerald-500"
-          aria-hidden="true"
-        />
-      )}
-      {step.status === "active" && (
-        <span
-          className="h-3 w-3 shrink-0 animate-pulse rounded-full bg-indigo-500"
-          aria-hidden="true"
-        />
-      )}
-      {step.status === "pending" && (
-        <span
-          className="h-3 w-3 shrink-0 rounded-full bg-slate-300"
-          aria-hidden="true"
-        />
-      )}
-      <span
-        className={cn(
-          "text-sm",
-          step.status === "pending" ? "text-slate-400" : "text-slate-700",
-        )}
-      >
-        {step.label}
-      </span>
-    </li>
-  );
-}
-
 /**
- * GenerateSprintDialog — AI sprint-plan generation modal showing a spinning
- * loader header and a checklist of generation steps. Manual close only.
+ * GenerateSprintDialog — confirm + progress modal for the AI sprint-plan
+ * generation. Shows a start prompt, then a single spinner while generation is
+ * in flight. Closing does not cancel the backend job.
  */
 function GenerateSprintDialog({
   open,
+  isGenerating,
+  onConfirm,
   onOpenChange,
 }: GenerateSprintDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent showCloseButton={false}>
+      <DialogContent showCloseButton={!isGenerating}>
         <DialogHeader>
           <div className="flex items-center gap-3">
             <span className="flex h-10 w-10 items-center justify-center rounded-full bg-indigo-100">
-              <Loader2
-                className="h-5 w-5 animate-spin text-indigo-600"
-                aria-hidden="true"
-              />
+              {isGenerating ? (
+                <Loader2
+                  className="h-5 w-5 animate-spin text-indigo-600"
+                  aria-hidden="true"
+                />
+              ) : (
+                <Sparkles
+                  className="h-5 w-5 text-indigo-600"
+                  aria-hidden="true"
+                />
+              )}
             </span>
             <div>
               <DialogTitle>{DIALOG.TITLE}</DialogTitle>
@@ -80,16 +55,23 @@ function GenerateSprintDialog({
           </div>
         </DialogHeader>
 
-        <ul className="space-y-3 py-2">
-          {AI_STEPS.map((step) => (
-            <StepRow key={step.id} step={step} />
-          ))}
-        </ul>
+        <p className="py-2 text-sm text-slate-600">
+          {isGenerating ? DIALOG.PENDING : DIALOG.DESCRIPTION}
+        </p>
 
-        <div className="flex justify-end">
-          <DialogClose asChild>
-            <Button variant="outline">{DIALOG.CANCEL}</Button>
-          </DialogClose>
+        <div className="flex justify-end gap-2">
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            {DIALOG.CLOSE}
+          </Button>
+          {!isGenerating && (
+            <Button
+              onClick={onConfirm}
+              className="bg-indigo-600 hover:bg-indigo-700"
+            >
+              <Sparkles aria-hidden="true" />
+              {DIALOG.START}
+            </Button>
+          )}
         </div>
       </DialogContent>
     </Dialog>

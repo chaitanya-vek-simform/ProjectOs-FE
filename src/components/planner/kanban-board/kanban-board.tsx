@@ -1,109 +1,76 @@
-import { useState } from "react";
-import { KANBAN_COLUMNS } from "@/constants/planner/mock";
+import { Loader2 } from "lucide-react";
 
-import { KanbanColumn } from "@/components/planner/kanban-column/kanban-column";
+import { Button } from "@/components/ui/button";
+import { LABELS } from "@/constants/labels";
+import { useUpdateTask } from "@/hooks/planner/mutations";
+import { useTasks } from "@/hooks/planner/queries";
+import { getErrorMessage } from "@/lib/utils";
 
-import type { KanbanColumn as KanbanColumnType } from "@/types/planner";
+import { KanbanBoardView } from "@/components/planner/kanban-board/kanban-board-view";
+import {
+  COLUMN_TO_STATUS,
+  toKanbanColumns,
+} from "@/components/planner/planner-mappers";
 
-interface DraggedTask {
-  taskId: string;
-  columnId: string;
-}
+const EMPTY = LABELS.PLANNER.EMPTY;
 
-interface DropPosition {
-  columnId: string;
-  index: number;
+interface KanbanBoardProps {
+  projectId: string;
+  selectedSprintId?: string;
 }
 
 /**
- * KanbanBoard — horizontal, scrollable row of kanban columns with position-aware drag-and-drop support.
+ * KanbanBoard — container that fetches sprint tasks, groups them into columns
+ * and persists cross-column moves via the update-task mutation. Delegates the
+ * drag-and-drop UX to {@link KanbanBoardView}.
  */
-function KanbanBoard() {
-  const [columns, setColumns] = useState<KanbanColumnType[]>(KANBAN_COLUMNS);
-  const [draggedTask, setDraggedTask] = useState<DraggedTask | null>(null);
-  const [dragOverColumnId, setDragOverColumnId] = useState<string | null>(null);
-  const [dropPosition, setDropPosition] = useState<DropPosition | null>(null);
+function KanbanBoard({ projectId, selectedSprintId }: KanbanBoardProps) {
+  const {
+    data: tasks,
+    isLoading,
+    isError,
+    error,
+    refetch,
+  } = useTasks(projectId, selectedSprintId);
+  const { mutate: updateTask } = useUpdateTask(projectId);
 
-  const handleTaskDragStart = (taskId: string, columnId: string) => {
-    setDraggedTask({ taskId, columnId });
-  };
+  if (isLoading) {
+    return (
+      <div className="flex min-h-[420px] items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500">
+        <Loader2 className="h-6 w-6 animate-spin" aria-hidden="true" />
+      </div>
+    );
+  }
 
-  const handleTaskDragEnd = () => {
-    setDraggedTask(null);
-    setDragOverColumnId(null);
-    setDropPosition(null);
-  };
+  if (isError) {
+    return (
+      <div className="flex min-h-[420px] flex-col items-center justify-center gap-3 rounded-xl border border-slate-200 bg-white text-center">
+        <p className="text-sm font-medium text-red-500">
+          {getErrorMessage(error, EMPTY.LOAD_ERROR)}
+        </p>
+        <Button variant="outline" onClick={() => void refetch()}>
+          {EMPTY.RETRY}
+        </Button>
+      </div>
+    );
+  }
 
-  const handleColumnDragOver = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    // eslint-disable-next-line no-param-reassign
-    e.dataTransfer.dropEffect = "move";
-  };
+  const columns = toKanbanColumns(tasks ?? []);
+  // Reseed the drag-and-drop view whenever the underlying task set changes.
+  const viewKey = (tasks ?? [])
+    .map((task) => `${task.id}:${task.status}`)
+    .join("|");
 
-  const handleColumnDragEnter = (columnId: string) => {
-    if (draggedTask) {
-      setDragOverColumnId(columnId);
-    }
-  };
-
-  const handleTaskDragOverCard = (columnId: string, taskIndex: number) => {
-    setDropPosition({ columnId, index: taskIndex });
-  };
-
-  const handleColumnDrop = (targetColumnId: string) => {
-    if (!draggedTask || !dropPosition) return;
-
-    const { taskId, columnId: sourceColumnId } = draggedTask;
-    const insertIndex = dropPosition.index;
-
-    setColumns((prevColumns) => {
-      const newColumns = prevColumns.map((col) => ({
-        ...col,
-        tasks: [...col.tasks],
-      }));
-      const sourceColumn = newColumns.find((col) => col.id === sourceColumnId);
-      const targetColumn = newColumns.find((col) => col.id === targetColumnId);
-
-      if (!sourceColumn || !targetColumn) return prevColumns;
-
-      const taskIndex = sourceColumn.tasks.findIndex((t) => t.id === taskId);
-      if (taskIndex === -1) return prevColumns;
-
-      const [movedTask] = sourceColumn.tasks.splice(taskIndex, 1);
-
-      // If moving within same column, adjust index
-      let finalIndex = insertIndex;
-      if (sourceColumnId === targetColumnId && insertIndex > taskIndex) {
-        finalIndex = insertIndex - 1;
-      }
-
-      targetColumn.tasks.splice(finalIndex, 0, movedTask);
-
-      return newColumns;
-    });
-
-    handleTaskDragEnd();
+  const handleTaskMoved = (taskId: string, targetColumnId: string) => {
+    updateTask({ taskId, data: { status: COLUMN_TO_STATUS[targetColumnId] } });
   };
 
   return (
-    <div className="flex min-h-[420px] gap-3 overflow-x-auto pb-4">
-      {columns.map((column) => (
-        <KanbanColumn
-          key={column.id}
-          column={column}
-          onDragOver={handleColumnDragOver}
-          onDragEnter={() => handleColumnDragEnter(column.id)}
-          onDrop={() => handleColumnDrop(column.id)}
-          isDragOver={dragOverColumnId === column.id}
-          dropPosition={
-            dragOverColumnId === column.id ? dropPosition?.index : undefined
-          }
-          onTaskDragStart={handleTaskDragStart}
-          onTaskDragEnd={handleTaskDragEnd}
-          onTaskDragOverCard={handleTaskDragOverCard}
-        />
-      ))}
-    </div>
+    <KanbanBoardView
+      key={viewKey}
+      initialColumns={columns}
+      onTaskMoved={handleTaskMoved}
+    />
   );
 }
 

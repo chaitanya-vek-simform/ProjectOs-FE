@@ -160,13 +160,3 @@ export interface SprintOption {
   /** Whether the sprint is the active selection (indigo). */
   active?: boolean;
 }
-
-/** Progress state of an AI generation step. */
-export type AiStepStatus = "done" | "active" | "pending";
-
-/** A single step in the AI sprint-generation checklist. */
-export interface AiStep {
-  id: string;
-  label: string;
-  status: AiStepStatus;
-}

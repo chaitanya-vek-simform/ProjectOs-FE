@@ -1,18 +1,22 @@
-import { Zap } from "lucide-react";
+import { Loader2, Zap } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { LABELS } from "@/constants/labels";
-import { SPRINT_OPTIONS } from "@/constants/planner/mock";
 import { cn } from "@/lib/utils";
 
-import type { PlannerView } from "@/types/planner";
+import type { PlannerView, SprintOption } from "@/types/planner";
 
 const CONTROLS = LABELS.PLANNER.CONTROLS;
 const VIEW = LABELS.PLANNER.VIEW;
 
 interface PlannerControlsProps {
   view: PlannerView;
+  sprintOptions: SprintOption[];
+  /** True while an AI sprint-plan generation is in flight (kickoff + polling window). */
+  isGenerating: boolean;
   onViewChange: (view: PlannerView) => void;
+  onSelectSprint: (sprintId: string) => void;
+  onNewTask: () => void;
   onGenerate: () => void;
 }
 
@@ -22,7 +26,11 @@ interface PlannerControlsProps {
  */
 function PlannerControls({
   view,
+  sprintOptions,
+  isGenerating,
   onViewChange,
+  onSelectSprint,
+  onNewTask,
   onGenerate,
 }: PlannerControlsProps) {
   return (
@@ -68,31 +76,45 @@ function PlannerControls({
           role="group"
           aria-label={CONTROLS.SPRINT_GROUP_ARIA}
         >
-          {SPRINT_OPTIONS.map((sprint) => (
-            <button
-              key={sprint.id}
-              type="button"
-              aria-pressed={sprint.active}
-              className={cn(
-                "px-3 py-1.5 text-sm font-medium transition-colors",
-                sprint.active && "bg-indigo-600 text-white",
-                sprint.done && "text-slate-400",
-                !sprint.active && !sprint.done && "text-slate-600",
-              )}
-            >
-              {sprint.label}
-            </button>
-          ))}
+          {sprintOptions.length === 0 ? (
+            <span className="px-3 py-1.5 text-sm text-slate-400">
+              {CONTROLS.NO_SPRINTS}
+            </span>
+          ) : (
+            sprintOptions.map((sprint) => (
+              <button
+                key={sprint.id}
+                type="button"
+                aria-pressed={sprint.active}
+                onClick={() => onSelectSprint(sprint.id)}
+                className={cn(
+                  "px-3 py-1.5 text-sm font-medium transition-colors",
+                  sprint.active && "bg-indigo-600 text-white",
+                  sprint.done && !sprint.active && "text-slate-400",
+                  !sprint.active && !sprint.done && "text-slate-600",
+                )}
+              >
+                {sprint.label}
+              </button>
+            ))
+          )}
         </div>
 
-        <Button variant="outline">{CONTROLS.NEW_TASK}</Button>
+        <Button variant="outline" onClick={onNewTask}>
+          {CONTROLS.NEW_TASK}
+        </Button>
 
         <Button
           onClick={onGenerate}
+          disabled={isGenerating}
           className="bg-indigo-600 hover:bg-indigo-700"
         >
-          <Zap aria-hidden="true" />
-          {CONTROLS.GENERATE_PLAN}
+          {isGenerating ? (
+            <Loader2 className="animate-spin" aria-hidden="true" />
+          ) : (
+            <Zap aria-hidden="true" />
+          )}
+          {isGenerating ? CONTROLS.GENERATING : CONTROLS.GENERATE_PLAN}
         </Button>
       </div>
     </div>

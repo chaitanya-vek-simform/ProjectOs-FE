@@ -1,7 +1,10 @@
 import { ProgressBar } from "@/components/common/progress-bar/progress-bar";
 import { StatusBadge } from "@/components/common/status-badge/status-badge";
 import { LABELS } from "@/constants/labels";
-import { SPRINT_SUMMARY } from "@/constants/planner/mock";
+
+import { toSprintSummary } from "@/components/planner/planner-mappers";
+
+import type { SprintResponse } from "@/types/planner";
 
 const SUMMARY = LABELS.PLANNER.SUMMARY;
 
@@ -24,12 +27,30 @@ function Metric({ label, value, valueClassName }: MetricProps) {
   );
 }
 
+interface SprintSummaryBarProps {
+  sprint: SprintResponse | undefined;
+}
+
 /**
  * SprintSummaryBar — the indigo header strip summarizing the active sprint's
- * dates, point commitments, progress and schedule status.
+ * dates, point commitments, progress and schedule status. Renders a neutral
+ * empty state when no sprint is selected.
  */
-function SprintSummaryBar() {
-  const summary = SPRINT_SUMMARY;
+function SprintSummaryBar({ sprint }: SprintSummaryBarProps) {
+  if (!sprint) {
+    return (
+      <div className="rounded-xl border border-slate-200 bg-slate-50 px-5 py-3">
+        <p className="text-sm font-semibold text-slate-700">
+          {SUMMARY.NO_SPRINT_TITLE}
+        </p>
+        <p className="text-xs text-slate-500">
+          {SUMMARY.NO_SPRINT_DESCRIPTION}
+        </p>
+      </div>
+    );
+  }
+
+  const summary = toSprintSummary(sprint);
 
   return (
     <div className="flex items-center gap-6 rounded-xl border border-indigo-200 bg-indigo-50 px-5 py-3">
