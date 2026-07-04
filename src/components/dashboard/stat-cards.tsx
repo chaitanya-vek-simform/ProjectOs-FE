@@ -1,6 +1,5 @@
 import { ProgressBar } from "@/components/common/progress-bar/progress-bar";
 import { StatusBadge } from "@/components/common/status-badge/status-badge";
-import { STAT_CARDS } from "@/constants/dashboard/mock";
 import { cn } from "@/lib/utils";
 
 import type { StatCard } from "@/types/dashboard";
@@ -44,10 +43,10 @@ function StatCardItem({ card }: { card: StatCard }) {
   );
 }
 
-function StatCards() {
+function StatCards({ cards }: { readonly cards: StatCard[] }) {
   return (
     <div className="grid grid-cols-4 gap-4">
-      {STAT_CARDS.map((card) => (
+      {cards.map((card) => (
         <StatCardItem key={card.id} card={card} />
       ))}
     </div>

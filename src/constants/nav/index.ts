@@ -2,6 +2,7 @@ import {
   AlertTriangle,
   FileStack,
   FileText,
+  FolderKanban,
   LayoutDashboard,
   type LucideIcon,
   ScrollText,
@@ -35,6 +36,12 @@ export const NAV_ITEMS: NavItemConfig[] = [
     label: "Dashboard",
     icon: LayoutDashboard,
     title: "Dashboard",
+  },
+  {
+    to: ROUTES.PROJECTS,
+    label: "Projects",
+    icon: FolderKanban,
+    title: "Projects",
   },
   {
     to: ROUTES.REQUIREMENTS,

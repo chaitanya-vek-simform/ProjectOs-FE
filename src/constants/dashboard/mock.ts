@@ -1,45 +1,9 @@
-import { LABELS } from "@/constants/labels";
-
 import type {
   ActivityItem,
   BurndownPoint,
   Milestone,
-  StatCard,
   VelocityPoint,
 } from "@/types/dashboard";
-
-const STATS = LABELS.DASHBOARD.STATS;
-
-export const STAT_CARDS: StatCard[] = [
-  {
-    id: "risk-score",
-    label: STATS.RISK_SCORE,
-    value: STATS.RISK_VALUE,
-    suffix: STATS.RISK_SUFFIX,
-    badge: { tone: "high", text: STATS.RISK_BADGE },
-  },
-  {
-    id: "sprint-progress",
-    label: STATS.SPRINT_PROGRESS,
-    value: STATS.SPRINT_VALUE,
-    suffix: STATS.SPRINT_SUFFIX,
-    progress: { value: 58, fillClassName: "bg-indigo-500" },
-  },
-  {
-    id: "open-tasks",
-    label: STATS.OPEN_TASKS,
-    value: STATS.OPEN_TASKS_VALUE,
-    suffix: STATS.OPEN_TASKS_SUFFIX,
-    alert: STATS.OPEN_TASKS_ALERT,
-  },
-  {
-    id: "budget-used",
-    label: STATS.BUDGET_USED,
-    value: STATS.BUDGET_VALUE,
-    progress: { value: 45, fillClassName: "bg-emerald-500" },
-    caption: STATS.BUDGET_CAPTION,
-  },
-];
 
 const BURNDOWN_LABELS = [
   "Jun 10",
