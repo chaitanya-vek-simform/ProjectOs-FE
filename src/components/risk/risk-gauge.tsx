@@ -60,12 +60,14 @@ function RiskGauge() {
           />
           <circle cx="100" cy="100" r="6" fill="#1e293b" />
         </svg>
-        <div className="absolute inset-x-0 bottom-0 flex items-end justify-center">
-          <span className="text-4xl font-black text-orange-500">
-            {RISK_GAUGE.value}
-          </span>
-          <span className="mb-1 text-sm text-slate-400">{GAUGE.SUFFIX}</span>
-        </div>
+      </div>
+      <div className="mt-4 flex items-baseline justify-center gap-1">
+        <span className="text-4xl font-black text-orange-500">
+          {RISK_GAUGE.value}
+        </span>
+        <span className="text-sm font-medium text-slate-400">
+          {GAUGE.SUFFIX}
+        </span>
       </div>
       <StatusBadge tone={RISK_GAUGE.tone} className="mt-3 px-3 py-1 text-sm">
         {GAUGE.BADGE}
