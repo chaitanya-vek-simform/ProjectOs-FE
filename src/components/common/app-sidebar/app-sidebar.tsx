@@ -6,10 +6,12 @@ import { useProject } from "@/contexts/useProject";
 import { useMeetings } from "@/hooks/meetings/queries";
 import { useProposal } from "@/hooks/proposal/queries";
 import { useRequirements } from "@/hooks/requirements/queries";
+import { useLatestRisk } from "@/hooks/risk/queries";
 import { LABELS } from "@/constants/labels";
 import { NAV_ITEMS, type NavBadge, type NavItemConfig } from "@/constants/nav";
 import { ROUTES } from "@/constants/routes";
 import { toProposal } from "@/types/proposal";
+import { riskLevelToTone } from "@/types/risk";
 
 import { NavBadgeChip, NavBadgeSkeleton } from "./nav-badge-chip";
 import { ProjectSwitcher } from "./project-switcher";
@@ -22,35 +24,20 @@ interface AppSidebarProps {
  * AppSidebar — slate-900 rail: logo, project selector, primary nav, user footer.
  * Mirrors the prototype's <aside>.
  */
-function resolveBadge(
-  item: NavItemConfig,
-  requirementsCount: number | undefined,
-  proposalBadge: NavBadge | undefined,
-  meetingsCount: number | undefined,
-) {
-  if (item.to === ROUTES.REQUIREMENTS && requirementsCount !== undefined) {
-    return { label: String(requirementsCount), tone: "primary" as const };
-  }
-  if (item.to === ROUTES.PROPOSAL && proposalBadge) {
-    return proposalBadge;
-  }
-  if (item.to === ROUTES.MEETINGS && meetingsCount !== undefined) {
-    return { label: String(meetingsCount), tone: "medium" as const };
-  }
-  return item.badge;
+interface NavBadgeState {
+  badge: NavBadge | undefined;
+  loading: boolean;
 }
 
-/** Whether the nav item's live badge data is still on its first fetch. */
-function isBadgeLoading(
+/** Live badge state per nav route (data-backed chips), keyed by route path. */
+type LiveNavBadges = Record<string, NavBadgeState>;
+
+/** Resolve a nav item's badge state: live data when available, else its static config. */
+function resolveBadgeState(
   item: NavItemConfig,
-  isRequirementsLoading: boolean,
-  isProposalLoading: boolean,
-  isMeetingsLoading: boolean,
-) {
-  if (item.to === ROUTES.REQUIREMENTS) return isRequirementsLoading;
-  if (item.to === ROUTES.PROPOSAL) return isProposalLoading;
-  if (item.to === ROUTES.MEETINGS) return isMeetingsLoading;
-  return false;
+  liveBadges: LiveNavBadges,
+): NavBadgeState {
+  return liveBadges[item.to] ?? { badge: item.badge, loading: false };
 }
 
 /** Renders the nav item's badge slot: loading skeleton, live/static badge, or nothing. */
@@ -75,10 +62,36 @@ function AppSidebar({ onLogout }: AppSidebarProps) {
     useProposal(projectId);
   const { data: meetings, isLoading: isMeetingsLoading } =
     useMeetings(projectId);
+  const { data: risk, isLoading: isRiskLoading } = useLatestRisk(projectId);
   const proposal = proposalResponse ? toProposal(proposalResponse) : undefined;
   const proposalBadge: NavBadge | undefined = proposal
     ? { label: proposal.statusLabel, tone: proposal.statusTone }
     : undefined;
+
+  const liveBadges: LiveNavBadges = {
+    [ROUTES.REQUIREMENTS]: {
+      badge: requirements
+        ? { label: String(requirements.length), tone: "primary" }
+        : undefined,
+      loading: isRequirementsLoading,
+    },
+    [ROUTES.PROPOSAL]: { badge: proposalBadge, loading: isProposalLoading },
+    [ROUTES.MEETINGS]: {
+      badge: meetings
+        ? { label: String(meetings.length), tone: "medium" }
+        : undefined,
+      loading: isMeetingsLoading,
+    },
+    [ROUTES.RISK]: {
+      badge: risk
+        ? {
+            label: risk.risk_level.toUpperCase(),
+            tone: riskLevelToTone(risk.risk_level),
+          }
+        : undefined,
+      loading: isRiskLoading,
+    },
+  };
 
   return (
     <aside className="flex w-60 shrink-0 flex-col border-r border-slate-800 bg-slate-900">
@@ -100,18 +113,7 @@ function AppSidebar({ onLogout }: AppSidebarProps) {
       <nav className="flex-1 space-y-0.5 overflow-y-auto px-3 py-3">
         {NAV_ITEMS.map((item) => {
           const Icon = item.icon;
-          const badge = resolveBadge(
-            item,
-            requirements?.length,
-            proposalBadge,
-            meetings?.length,
-          );
-          const loading = isBadgeLoading(
-            item,
-            isRequirementsLoading,
-            isProposalLoading,
-            isMeetingsLoading,
-          );
+          const { badge, loading } = resolveBadgeState(item, liveBadges);
           return (
             <NavLink
               key={item.to}

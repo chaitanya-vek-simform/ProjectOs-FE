@@ -75,7 +75,7 @@ export const NAV_ITEMS: NavItemConfig[] = [
     label: "Risk",
     icon: AlertTriangle,
     title: "Risk Prediction",
-    badge: { label: "HIGH", tone: "critical" },
+    badge: { label: "", tone: "critical" },
   },
   {
     to: ROUTES.RESOURCES,
