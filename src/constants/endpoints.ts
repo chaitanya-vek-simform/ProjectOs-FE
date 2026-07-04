@@ -44,6 +44,7 @@ export const ENDPOINTS = {
     COMPUTE: (projectId: string) => `/projects/${projectId}/risk/compute`,
     LATEST: (projectId: string) => `/projects/${projectId}/risk/latest`,
     HISTORY: (projectId: string) => `/projects/${projectId}/risk/history`,
+    TASK: (taskId: string) => `/tasks/${taskId}`,
   },
   RESOURCES: {
     TEAM: "/resources/team",

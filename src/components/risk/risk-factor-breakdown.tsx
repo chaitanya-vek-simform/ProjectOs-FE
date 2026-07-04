@@ -1,21 +1,29 @@
+import { Loader2 } from "lucide-react";
+
 import { ProgressBar } from "@/components/common/progress-bar/progress-bar";
 import { LABELS } from "@/constants/labels";
-import { RISK_FACTORS } from "@/constants/risk/mock";
 import { cn } from "@/lib/utils";
 
-import type { RiskFactor } from "@/types/risk";
+import { FACTOR_SCORE_CLASS, type RiskFactor } from "@/types/risk";
 
 const FACTORS = LABELS.RISK.FACTORS;
 
-const SCORE_TONE_CLASSES: Record<RiskFactor["scoreTone"], string> = {
-  orange: "text-orange-500",
-  red: "text-red-500",
-  amber: "text-amber-500",
-  emerald: "text-emerald-500",
-};
+interface RiskFactorBreakdownProps {
+  factors: RiskFactor[];
+  totalScore: number;
+  maxScore: number;
+  onRecompute: () => void;
+  isRecomputing: boolean;
+}
 
 /** RiskFactorBreakdown — scored contributors to the overall risk with a total row. */
-function RiskFactorBreakdown() {
+function RiskFactorBreakdown({
+  factors,
+  totalScore,
+  maxScore,
+  onRecompute,
+  isRecomputing,
+}: RiskFactorBreakdownProps) {
   return (
     <div className="col-span-2 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
       <div className="mb-4 flex items-center justify-between">
@@ -24,20 +32,29 @@ function RiskFactorBreakdown() {
         </h3>
         <button
           type="button"
-          className="text-xs font-medium text-indigo-600 hover:text-indigo-700"
+          onClick={onRecompute}
+          disabled={isRecomputing}
+          className="inline-flex items-center gap-1 text-xs font-medium text-indigo-600 hover:text-indigo-700 disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {FACTORS.RECOMPUTE}
+          {isRecomputing ? (
+            <>
+              <Loader2 className="size-3 animate-spin" aria-hidden="true" />
+              {FACTORS.RECOMPUTING}
+            </>
+          ) : (
+            FACTORS.RECOMPUTE
+          )}
         </button>
       </div>
       <div className="space-y-3">
-        {RISK_FACTORS.map((factor) => (
+        {factors.map((factor) => (
           <div key={factor.id}>
             <div className="mb-1 flex items-center justify-between text-sm">
               <span className="text-slate-700">{factor.label}</span>
               <span
                 className={cn(
                   "font-semibold",
-                  SCORE_TONE_CLASSES[factor.scoreTone],
+                  FACTOR_SCORE_CLASS[factor.scoreTone],
                 )}
               >
                 {factor.score}
@@ -55,7 +72,7 @@ function RiskFactorBreakdown() {
           {FACTORS.TOTAL_LABEL}
         </span>
         <span className="text-lg font-bold text-orange-500">
-          {FACTORS.TOTAL_SCORE}
+          {LABELS.RISK.DYNAMIC.SCORE(totalScore, maxScore)}
         </span>
       </div>
     </div>

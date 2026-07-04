@@ -4,8 +4,12 @@ import { LABELS } from "@/constants/labels";
 
 const ANALYSIS = LABELS.RISK.ANALYSIS;
 
+interface AiRiskAnalysisProps {
+  paragraphs: string[];
+}
+
 /** AiRiskAnalysis — narrative summary of the current risk posture. */
-function AiRiskAnalysis() {
+function AiRiskAnalysis({ paragraphs }: AiRiskAnalysisProps) {
   return (
     <div className="rounded-xl border border-slate-200 border-l-4 border-l-orange-400 bg-white p-5 shadow-sm">
       <div className="mb-3 flex items-center gap-2">
@@ -15,16 +19,17 @@ function AiRiskAnalysis() {
         </h3>
       </div>
       <div className="space-y-3">
-        <p className="text-sm leading-relaxed text-slate-700">
-          <span className="font-semibold">{ANALYSIS.LEAD_BOLD}</span>
-          {ANALYSIS.PARAGRAPH_ONE}
-        </p>
-        <p className="text-sm leading-relaxed text-slate-700">
-          {ANALYSIS.PARAGRAPH_TWO}
-        </p>
-        <p className="text-sm leading-relaxed text-slate-400 italic">
-          {ANALYSIS.PARAGRAPH_THREE}
-        </p>
+        {paragraphs.length > 0 ? (
+          paragraphs.map((paragraph, index) => (
+            <p key={index} className="text-sm leading-relaxed text-slate-700">
+              {paragraph}
+            </p>
+          ))
+        ) : (
+          <p className="text-sm leading-relaxed text-slate-400 italic">
+            {ANALYSIS.EMPTY}
+          </p>
+        )}
       </div>
     </div>
   );
