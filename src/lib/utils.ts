@@ -44,20 +44,30 @@ export const disableFutureDates = (date: Date): boolean => {
   return date > today;
 };
 
+type ApiValidationIssue = {
+  field?: string;
+  message?: string;
+  msg?: string;
+  loc?: Array<string | number>;
+};
+
 /**
  * Extract a human-readable message from an Axios error, falling back to a default.
- * Handles both string messages and field-level validation arrays.
+ * Handles plain string payloads (`message` or FastAPI's `detail`) as well as
+ * field-level validation arrays from either shape.
  */
 export const getErrorMessage = (error: Error, fallback: string): string => {
   const axiosError = error as AxiosError<{
-    message?: string | Array<{ field: string; message: string }>;
+    message?: string | ApiValidationIssue[];
+    detail?: string | ApiValidationIssue[];
   }>;
-  const msg = axiosError.response?.data?.message;
-  if (typeof msg === "string" && msg) return msg;
-  if (Array.isArray(msg) && msg.length > 0) {
+  const data = axiosError.response?.data;
+  const text = data?.detail ?? data?.message;
+  if (typeof text === "string" && text) return text;
+  if (Array.isArray(text) && text.length > 0) {
     return (
-      msg
-        .map((e) => (typeof e?.message === "string" ? e.message : ""))
+      text
+        .map((issue) => issue?.msg ?? issue?.message ?? "")
         .filter(Boolean)
         .join(", ") || fallback
     );

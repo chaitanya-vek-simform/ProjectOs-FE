@@ -16,6 +16,15 @@ export interface AuthTokens {
   refreshToken: string;
 }
 
+export interface ForgotPasswordDto {
+  email: string;
+}
+
+export interface ResetPasswordDto {
+  token: string;
+  password: string;
+}
+
 /** Current authenticated user (`GET /auth/me`, snake_case per API contract). */
 export interface CurrentUser {
   id: string;

@@ -4,8 +4,10 @@ import { ENDPOINTS } from "@/constants/endpoints";
 import type {
   AuthTokens,
   CurrentUser,
+  ForgotPasswordDto,
   LoginDto,
   RegisterDto,
+  ResetPasswordDto,
 } from "@/types/auth";
 
 interface AuthTokensResponse {
@@ -46,4 +48,10 @@ export const authApi = {
 
   getCurrentUser: (): Promise<CurrentUser> =>
     api.get<CurrentUser>(ENDPOINTS.AUTH.ME).then((r) => r.data),
+
+  forgotPassword: (data: ForgotPasswordDto): Promise<void> =>
+    api.post(ENDPOINTS.AUTH.FORGOT_PASSWORD, data).then(() => undefined),
+
+  resetPassword: (data: ResetPasswordDto): Promise<void> =>
+    api.post(ENDPOINTS.AUTH.RESET_PASSWORD, data).then(() => undefined),
 };
