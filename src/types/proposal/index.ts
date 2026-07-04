@@ -277,6 +277,14 @@ export function toProposal(response: ProposalResponse): Proposal {
     tone: "neutral",
   };
 
+  const costBreakdown = response.cost_breakdown
+    .map(toCostBreakdownItem)
+    .filter((item): item is CostBreakdownItem => item !== null);
+
+  // Derive the engagement total from the breakdown rows so it always matches the
+  // per-role days shown in the table, rather than trusting `response.total_days`.
+  const totalDays = costBreakdown.reduce((sum, item) => sum + item.days, 0);
+
   return {
     id: response.id,
     projectId: response.project_id,
@@ -292,9 +300,7 @@ export function toProposal(response: ProposalResponse): Proposal {
     timeline: response.timeline
       .map(toTimelinePhase)
       .filter((phase): phase is TimelinePhase => phase !== null),
-    costBreakdown: response.cost_breakdown
-      .map(toCostBreakdownItem)
-      .filter((item): item is CostBreakdownItem => item !== null),
+    costBreakdown,
     risks: response.risks
       .map(toProposalRisk)
       .filter((risk): risk is ProposalRisk => risk !== null),
@@ -303,8 +309,8 @@ export function toProposal(response: ProposalResponse): Proposal {
         ? USD_FORMATTER.format(response.total_cost_usd)
         : L.COST_BREAKDOWN.PENDING,
     totalDaysLabel:
-      response.total_days !== null
-        ? L.COST_BREAKDOWN.TOTAL_DAYS_VALUE(response.total_days)
+      costBreakdown.length > 0
+        ? L.COST_BREAKDOWN.TOTAL_DAYS_VALUE(totalDays)
         : L.COST_BREAKDOWN.PENDING,
   };
 }
