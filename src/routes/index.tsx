@@ -9,6 +9,7 @@ import { PageFallback } from "./page-fallback";
 
 const LoginPage = lazy(() => import("@/pages/auth/LoginPage"));
 const DashboardPage = lazy(() => import("@/pages/dashboard/DashboardPage"));
+const ProjectsPage = lazy(() => import("@/pages/projects/ProjectsPage"));
 const RequirementsPage = lazy(
   () => import("@/pages/requirements/RequirementsPage"),
 );
@@ -32,6 +33,7 @@ export const router = createBrowserRouter([
         children: [
           { index: true, element: <Navigate to={ROUTES.DASHBOARD} replace /> },
           { path: ROUTES.DASHBOARD, element: withSuspense(<DashboardPage />) },
+          { path: ROUTES.PROJECTS, element: withSuspense(<ProjectsPage />) },
           {
             path: ROUTES.REQUIREMENTS,
             element: withSuspense(<RequirementsPage />),
