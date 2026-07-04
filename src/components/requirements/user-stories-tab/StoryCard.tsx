@@ -10,10 +10,11 @@ import type { UserStory } from "@/types/requirements";
 
 interface StoryCardProps {
   story: UserStory;
+  onEdit: () => void;
 }
 
 /** A single user story card with metadata and Gherkin acceptance criteria. */
-function StoryCard({ story }: StoryCardProps) {
+function StoryCard({ story, onEdit }: StoryCardProps) {
   return (
     <div className="rounded-lg border border-slate-200 p-4">
       <div className="flex items-start justify-between gap-3">
@@ -29,6 +30,7 @@ function StoryCard({ story }: StoryCardProps) {
           variant="ghost"
           size="icon-sm"
           aria-label={LABELS.REQUIREMENTS.USER_STORIES.EDIT_ARIA}
+          onClick={onEdit}
         >
           <Pencil className="size-4 text-slate-400" aria-hidden="true" />
         </Button>

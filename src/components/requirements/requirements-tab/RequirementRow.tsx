@@ -14,6 +14,7 @@ interface RequirementRowProps {
   priorityTone: StatusTone;
   priorityLabel: string;
   chipClassName: string;
+  onEdit: () => void;
 }
 
 /** A single requirement line — code chip, title/subtitle, priority badge, edit action. */
@@ -24,6 +25,7 @@ function RequirementRow({
   priorityTone,
   priorityLabel,
   chipClassName,
+  onEdit,
 }: RequirementRowProps) {
   return (
     <div className="flex items-start justify-between gap-3 border-b border-slate-100 py-3 last:border-b-0">
@@ -47,6 +49,7 @@ function RequirementRow({
           variant="ghost"
           size="icon-sm"
           aria-label={LABELS.REQUIREMENTS.REQUIREMENTS.EDIT_ARIA}
+          onClick={onEdit}
         >
           <Pencil className="size-4 text-slate-400" aria-hidden="true" />
         </Button>

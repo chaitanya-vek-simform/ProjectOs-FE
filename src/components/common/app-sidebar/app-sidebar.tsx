@@ -2,8 +2,11 @@ import { LogOut, Zap } from "lucide-react";
 import { NavLink } from "react-router-dom";
 
 import { cn, getInitials } from "@/lib/utils";
+import { useProject } from "@/contexts/useProject";
+import { useRequirements } from "@/hooks/requirements/queries";
 import { LABELS } from "@/constants/labels";
-import { NAV_ITEMS } from "@/constants/nav";
+import { NAV_ITEMS, type NavItemConfig } from "@/constants/nav";
+import { ROUTES } from "@/constants/routes";
 
 import { NavBadgeChip } from "./nav-badge-chip";
 import { ProjectSwitcher } from "./project-switcher";
@@ -16,8 +19,21 @@ interface AppSidebarProps {
  * AppSidebar — slate-900 rail: logo, project selector, primary nav, user footer.
  * Mirrors the prototype's <aside>.
  */
+function resolveBadge(
+  item: NavItemConfig,
+  requirementsCount: number | undefined,
+) {
+  if (item.to === ROUTES.REQUIREMENTS && requirementsCount !== undefined) {
+    return { label: String(requirementsCount), tone: "primary" as const };
+  }
+  return item.badge;
+}
+
 function AppSidebar({ onLogout }: AppSidebarProps) {
   const nav = LABELS.NAV;
+  const { projectId } = useProject();
+  const { data: requirements } = useRequirements(projectId);
+
   return (
     <aside className="flex w-60 shrink-0 flex-col border-r border-slate-800 bg-slate-900">
       <div className="border-b border-slate-800 px-4 py-5">
@@ -38,6 +54,7 @@ function AppSidebar({ onLogout }: AppSidebarProps) {
       <nav className="flex-1 space-y-0.5 overflow-y-auto px-3 py-3">
         {NAV_ITEMS.map((item) => {
           const Icon = item.icon;
+          const badge = resolveBadge(item, requirements?.length);
           return (
             <NavLink
               key={item.to}
@@ -53,7 +70,7 @@ function AppSidebar({ onLogout }: AppSidebarProps) {
             >
               <Icon className="h-4 w-4 shrink-0" />
               {item.label}
-              {item.badge ? <NavBadgeChip badge={item.badge} /> : null}
+              {badge ? <NavBadgeChip badge={badge} /> : null}
             </NavLink>
           );
         })}

@@ -1,7 +1,6 @@
 import { Search } from "lucide-react";
 
 import { LABELS } from "@/constants/labels";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -13,8 +12,22 @@ import {
 
 const L = LABELS.REQUIREMENTS.REQUIREMENTS;
 
-/** Search + type filter + generate-stories action row for the Requirements tab. */
-function RequirementsToolbar() {
+const FILTER_ALL = "all";
+
+interface RequirementsToolbarProps {
+  search: string;
+  onSearchChange: (value: string) => void;
+  typeFilter: string;
+  onTypeFilterChange: (value: string) => void;
+}
+
+/** Search + type filter row for the Requirements tab. */
+function RequirementsToolbar({
+  search,
+  onSearchChange,
+  typeFilter,
+  onTypeFilterChange,
+}: RequirementsToolbarProps) {
   return (
     <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
       <div className="relative flex-1">
@@ -26,29 +39,25 @@ function RequirementsToolbar() {
           placeholder={L.SEARCH_PLACEHOLDER}
           className="pl-9"
           aria-label={L.SEARCH_PLACEHOLDER}
+          value={search}
+          onChange={(e) => onSearchChange(e.target.value)}
         />
       </div>
-      <Select>
+      <Select value={typeFilter} onValueChange={onTypeFilterChange}>
         <SelectTrigger className="sm:w-48" aria-label={L.FILTER_LABEL}>
           <SelectValue placeholder={L.FILTER_ALL} />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="all">{L.FILTER_ALL}</SelectItem>
+          <SelectItem value={FILTER_ALL}>{L.FILTER_ALL}</SelectItem>
           <SelectItem value="functional">{L.FILTER_FUNCTIONAL}</SelectItem>
-          <SelectItem value="non-functional">
+          <SelectItem value="non_functional">
             {L.FILTER_NON_FUNCTIONAL}
           </SelectItem>
           <SelectItem value="risk">{L.FILTER_RISK}</SelectItem>
         </SelectContent>
       </Select>
-      <Button
-        type="button"
-        className="bg-indigo-600 text-white hover:bg-indigo-700"
-      >
-        {L.GENERATE_STORIES}
-      </Button>
     </div>
   );
 }
 
-export { RequirementsToolbar };
+export { RequirementsToolbar, FILTER_ALL };

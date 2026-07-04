@@ -16,10 +16,11 @@ const EPIC_TONE_CLASSES: Record<EpicTone, string> = {
 
 interface EpicCardProps {
   epic: Epic;
+  onEditStory: (storyId: string) => void;
 }
 
 /** An epic grouping — header with accent tile plus its child story cards or a note. */
-function EpicCard({ epic }: EpicCardProps) {
+function EpicCard({ epic, onEditStory }: EpicCardProps) {
   return (
     <Card className="gap-0 py-0">
       <CardHeader className="flex flex-row items-center justify-between border-b px-5 py-4">
@@ -47,7 +48,11 @@ function EpicCard({ epic }: EpicCardProps) {
       </CardHeader>
       <CardContent className="space-y-3 px-5 py-4">
         {epic.stories.map((story) => (
-          <StoryCard key={story.id} story={story} />
+          <StoryCard
+            key={story.id}
+            story={story}
+            onEdit={() => onEditStory(story.id)}
+          />
         ))}
         {epic.note ? (
           <p className="text-sm text-slate-500">{epic.note}</p>

@@ -3,11 +3,19 @@ import { useQuery } from "@tanstack/react-query";
 import { plannerApi } from "@/services/planner/plannerApi";
 import { PLANNER_QUERY_KEYS } from "@/constants/queryKeys";
 
-export function useSprints(projectId?: string) {
+const POLL_INTERVAL_MS = 10_000;
+
+/**
+ * @param isGenerating Pass the generate-sprints mutation's `isPending` to
+ * poll every 10s while an async AI sprint plan is being generated, e.g.
+ * `useSprints(projectId, generateSprints.isPending)`.
+ */
+export function useSprints(projectId?: string, isGenerating = false) {
   return useQuery({
     queryKey: PLANNER_QUERY_KEYS.SPRINTS(projectId ?? ""),
     queryFn: () => plannerApi.getSprints(projectId!),
     enabled: Boolean(projectId),
+    refetchInterval: isGenerating ? POLL_INTERVAL_MS : false,
   });
 }
 
