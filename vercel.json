@@ -1,27 +1,8 @@
 {
-  "buildCommand": "yarn build",
-  "devCommand": "yarn dev",
-  "installCommand": "yarn install",
-  "framework": "vite",
-  "routes": [
+  "rewrites": [
     {
-      "src": "/index.html",
-      "permanent": false,
-      "continue": true
-    },
-    {
-      "src": "/assets/.*",
-      "permanent": true,
-      "continue": true
-    },
-    {
-      "src": "/api/.*",
-      "permanent": false,
-      "continue": true
-    },
-    {
-      "src": "/.*",
-      "dest": "/index.html"
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ]
 }
