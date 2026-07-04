@@ -11,8 +11,8 @@ function App() {
     <AuthProvider>
       <ProjectProvider>
         <RouterProvider router={router} />
+        <Toaster />
       </ProjectProvider>
-      <Toaster />
     </AuthProvider>
   );
 }

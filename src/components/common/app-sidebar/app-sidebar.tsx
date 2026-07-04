@@ -1,4 +1,4 @@
-import { ChevronDown, LogOut, Zap } from "lucide-react";
+import { LogOut, Zap } from "lucide-react";
 import { NavLink } from "react-router-dom";
 
 import { cn, getInitials } from "@/lib/utils";
@@ -6,6 +6,7 @@ import { LABELS } from "@/constants/labels";
 import { NAV_ITEMS } from "@/constants/nav";
 
 import { NavBadgeChip } from "./nav-badge-chip";
+import { ProjectSwitcher } from "./project-switcher";
 
 interface AppSidebarProps {
   onLogout: () => void;
@@ -31,15 +32,7 @@ function AppSidebar({ onLogout }: AppSidebarProps) {
       </div>
 
       <div className="border-b border-slate-800 px-3 py-3">
-        <div className="cursor-pointer rounded-lg bg-slate-800 px-3 py-2 transition-colors hover:bg-slate-700">
-          <p className="mb-0.5 text-xs text-slate-400">{nav.CURRENT_PROJECT}</p>
-          <div className="flex items-center justify-between">
-            <p className="truncate text-sm font-medium text-white">
-              {nav.PROJECT_NAME}
-            </p>
-            <ChevronDown className="h-4 w-4 shrink-0 text-slate-400" />
-          </div>
-        </div>
+        <ProjectSwitcher />
       </div>
 
       <nav className="flex-1 space-y-0.5 overflow-y-auto px-3 py-3">

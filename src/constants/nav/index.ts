@@ -9,6 +9,7 @@ import {
   Video,
 } from "lucide-react";
 
+import { NAV_LABELS } from "@/constants/nav/labels";
 import { ROUTES } from "@/constants/routes";
 
 import type { StatusTone } from "@/types/common";
@@ -74,5 +75,35 @@ export const NAV_ITEMS: NavItemConfig[] = [
     label: "Resources",
     icon: Users,
     title: "Resource Allocation",
+  },
+];
+
+export interface ProjectOption {
+  id: string;
+  /** Display name shown in the sidebar switcher. */
+  name: string;
+  /** Subtitle rendered in the topbar while this project is active. */
+  subtitle: string;
+}
+
+/**
+ * Selectable projects for the sidebar project switcher. The first entry is the
+ * default and reuses the shared NAV copy; the rest are additional demo projects.
+ */
+export const PROJECTS: ProjectOption[] = [
+  {
+    id: "techflow-logistics",
+    name: NAV_LABELS.PROJECT_NAME,
+    subtitle: NAV_LABELS.SUBTITLE,
+  },
+  {
+    id: "northwind-retail",
+    name: "Northwind Retail",
+    subtitle: "Northwind Omnichannel Commerce · Sprint 5 Active",
+  },
+  {
+    id: "apex-health-cloud",
+    name: "Apex Health Cloud",
+    subtitle: "Apex Patient Platform · Discovery Phase",
   },
 ];
