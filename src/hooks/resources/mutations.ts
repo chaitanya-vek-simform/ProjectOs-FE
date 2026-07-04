@@ -9,9 +9,6 @@ import { getErrorMessage } from "@/lib/utils";
 export function useSuggestTeam() {
   return useMutation({
     mutationFn: (projectId: string) => resourcesApi.suggestTeam(projectId),
-    onSuccess: () => {
-      toast.success(LABELS.RESOURCES.API.SUGGEST_SUCCESS);
-    },
     onError: (error: Error) => {
       toast.error(getErrorMessage(error, LABELS.RESOURCES.API.SUGGEST_ERROR));
     },

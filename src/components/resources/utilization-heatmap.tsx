@@ -8,7 +8,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { LABELS } from "@/constants/labels";
-import { HEATMAP_ROWS, HEATMAP_WEEK_COUNT } from "@/constants/resources/mock";
+import { HEATMAP_WEEK_COUNT } from "@/constants/resources";
+
+import type { HeatmapRow } from "@/types/resources";
 
 const HEATMAP_LABELS = LABELS.RESOURCES.HEATMAP;
 
@@ -17,7 +19,11 @@ const WEEK_COLUMNS = Array.from(
   (_, index) => index + 1,
 );
 
-function UtilizationHeatmap() {
+interface UtilizationHeatmapProps {
+  rows: HeatmapRow[];
+}
+
+function UtilizationHeatmap({ rows }: UtilizationHeatmapProps) {
   return (
     <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
       <div className="mb-4 flex items-center justify-between">
@@ -38,7 +44,7 @@ function UtilizationHeatmap() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {HEATMAP_ROWS.map((row) => (
+          {rows.map((row) => (
             <TableRow key={row.id}>
               <TableCell className="font-medium text-slate-900">
                 {row.member}

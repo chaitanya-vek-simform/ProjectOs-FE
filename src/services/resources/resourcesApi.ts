@@ -1,19 +1,23 @@
 import api from "@/services/api";
 import { ENDPOINTS } from "@/constants/endpoints";
 
-/**
- * The resources endpoints return unstructured payloads in the OpenAPI spec,
- * so responses are typed as `unknown` until a concrete contract is published.
- */
+import type {
+  SuggestTeamResponse,
+  TeamMemberResponse,
+  UtilizationResponse,
+} from "@/types/resources";
+
 export const resourcesApi = {
-  getTeam: (): Promise<unknown> =>
-    api.get<unknown>(ENDPOINTS.RESOURCES.TEAM).then((r) => r.data),
+  getTeam: (): Promise<TeamMemberResponse[]> =>
+    api.get<TeamMemberResponse[]>(ENDPOINTS.RESOURCES.TEAM).then((r) => r.data),
 
-  getUtilization: (): Promise<unknown> =>
-    api.get<unknown>(ENDPOINTS.RESOURCES.UTILIZATION).then((r) => r.data),
-
-  suggestTeam: (projectId: string): Promise<unknown> =>
+  getUtilization: (): Promise<UtilizationResponse[]> =>
     api
-      .post<unknown>(ENDPOINTS.RESOURCES.SUGGEST(projectId))
+      .get<UtilizationResponse[]>(ENDPOINTS.RESOURCES.UTILIZATION)
+      .then((r) => r.data),
+
+  suggestTeam: (projectId: string): Promise<SuggestTeamResponse> =>
+    api
+      .post<SuggestTeamResponse>(ENDPOINTS.RESOURCES.SUGGEST(projectId))
       .then((r) => r.data),
 };

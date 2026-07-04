@@ -25,6 +25,7 @@ export const RISK_LABELS = {
     BLOCKED_TASKS: "Blocked Tasks",
     MILESTONE_DRIFT: "Milestone Drift",
     SCOPE_CREEP: "Scope Creep",
+    MEETING_RISK: "Meeting Risk",
   },
   ANALYSIS: {
     TITLE: "AI Risk Analysis",

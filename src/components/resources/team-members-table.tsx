@@ -1,4 +1,4 @@
-import { Sparkles } from "lucide-react";
+import { Loader2, Sparkles } from "lucide-react";
 
 import { ProgressBar } from "@/components/common/progress-bar/progress-bar";
 import { StatusBadge } from "@/components/common/status-badge/status-badge";
@@ -12,12 +12,18 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { LABELS } from "@/constants/labels";
-import { TEAM_MEMBERS } from "@/constants/resources/mock";
 import { cn, getInitials } from "@/lib/utils";
 
 import type { TeamMember } from "@/types/resources";
 
 const TEAM_LABELS = LABELS.RESOURCES.TEAM_MEMBERS;
+
+interface TeamMembersTableProps {
+  members: TeamMember[];
+  onSuggest: () => void;
+  isSuggesting: boolean;
+  canSuggest: boolean;
+}
 
 function MemberRow({ member }: { member: TeamMember }) {
   return (
@@ -73,15 +79,29 @@ function MemberRow({ member }: { member: TeamMember }) {
   );
 }
 
-function TeamMembersTable() {
+function TeamMembersTable({
+  members,
+  onSuggest,
+  isSuggesting,
+  canSuggest,
+}: TeamMembersTableProps) {
   return (
     <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
       <div className="mb-4 flex items-center justify-between">
         <h2 className="text-lg font-semibold text-slate-900">
           {TEAM_LABELS.TITLE}
         </h2>
-        <Button className="bg-indigo-600 text-white hover:bg-indigo-700">
-          <Sparkles aria-hidden="true" />
+        <Button
+          type="button"
+          onClick={onSuggest}
+          disabled={isSuggesting || !canSuggest}
+          className="bg-indigo-600 text-white hover:bg-indigo-700"
+        >
+          {isSuggesting ? (
+            <Loader2 className="animate-spin" aria-hidden="true" />
+          ) : (
+            <Sparkles aria-hidden="true" />
+          )}
           {TEAM_LABELS.AI_SUGGEST}
         </Button>
       </div>
@@ -97,7 +117,7 @@ function TeamMembersTable() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {TEAM_MEMBERS.map((member) => (
+          {members.map((member) => (
             <MemberRow key={member.id} member={member} />
           ))}
         </TableBody>

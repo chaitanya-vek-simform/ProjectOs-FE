@@ -22,6 +22,7 @@ export const RISK_FACTOR_META: RiskFactorMeta[] = [
   { key: "blocked_tasks", label: FACTORS.BLOCKED_TASKS, max: 20 },
   { key: "milestone_drift", label: FACTORS.MILESTONE_DRIFT, max: 20 },
   { key: "scope_creep", label: FACTORS.SCOPE_CREEP, max: 15 },
+  { key: "meeting_risk", label: FACTORS.MEETING_RISK, max: 10 },
 ];
 
 /** Total achievable risk score across all factors. */
