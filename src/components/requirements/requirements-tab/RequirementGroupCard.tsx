@@ -5,15 +5,17 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 interface RequirementGroupCardProps {
   title: string;
   dotClassName: string;
-  showMoreLabel: string;
+  showMoreLabel?: string;
+  onShowMore?: () => void;
   children: React.ReactNode;
 }
 
-/** Wrapper card for a labelled group of requirements with a "show more" footer link. */
+/** Wrapper card for a labelled group of requirements with an optional "show more" footer link. */
 function RequirementGroupCard({
   title,
   dotClassName,
   showMoreLabel,
+  onShowMore,
   children,
 }: RequirementGroupCardProps) {
   return (
@@ -28,14 +30,19 @@ function RequirementGroupCard({
         </CardTitle>
       </CardHeader>
       <CardContent className="px-5 py-1">
-        {children}
-        <Button
-          type="button"
-          variant="link"
-          className="h-auto p-0 py-3 text-sm text-indigo-600"
-        >
-          {showMoreLabel}
-        </Button>
+        <div className="max-h-[calc(50vh-8rem)] overflow-y-auto">
+          {children}
+        </div>
+        {showMoreLabel ? (
+          <Button
+            type="button"
+            variant="link"
+            className="h-auto p-0 py-3 text-sm text-indigo-600"
+            onClick={onShowMore}
+          >
+            {showMoreLabel}
+          </Button>
+        ) : null}
       </CardContent>
     </Card>
   );

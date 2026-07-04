@@ -1,10 +1,12 @@
 import { useRef, useState } from "react";
-import { UploadCloud, X, File } from "lucide-react";
+import { Loader2, UploadCloud, File } from "lucide-react";
 
 import { LABELS } from "@/constants/labels";
+import { useUploadDocument } from "@/hooks/requirements/mutations";
 import { Button } from "@/components/ui/button";
 
 const L = LABELS.REQUIREMENTS.UPLOAD;
+const TOAST_L = LABELS.REQUIREMENTS.TOAST;
 const ACCEPTED_FORMATS = [
   "application/pdf",
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
@@ -12,25 +14,28 @@ const ACCEPTED_FORMATS = [
 ];
 const ACCEPTED_EXTENSIONS = [".pdf", ".docx", ".txt"];
 
-interface UploadedFile {
-  file: File;
+interface PendingUpload {
   id: string;
+  file: File;
+}
+
+interface UploadDropzoneProps {
+  projectId: string | undefined;
 }
 
 /** RFP / requirement document upload dropzone with file browser and drag-drop support. */
-function UploadDropzone() {
+function UploadDropzone({ projectId }: UploadDropzoneProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
+  const [pendingUploads, setPendingUploads] = useState<PendingUpload[]>([]);
   const [dragActive, setDragActive] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { mutate: uploadDocument } = useUploadDocument(projectId ?? "");
 
   const validateFile = (file: File): boolean => {
     if (!ACCEPTED_FORMATS.includes(file.type)) {
       const ext = file.name.substring(file.name.lastIndexOf(".")).toLowerCase();
       if (!ACCEPTED_EXTENSIONS.includes(ext)) {
-        setError(
-          `Invalid file type: ${file.name}. Only PDF, DOCX, and TXT files are allowed.`,
-        );
+        setError(TOAST_L.INVALID_FILE_TYPE);
         return false;
       }
     }
@@ -38,23 +43,21 @@ function UploadDropzone() {
   };
 
   const handleFiles = (files: FileList | null) => {
-    if (!files) return;
+    if (!files || !projectId) return;
 
     setError(null);
-    const newFiles: UploadedFile[] = [];
 
     Array.from(files).forEach((file) => {
-      if (validateFile(file)) {
-        newFiles.push({
-          file,
-          id: `${file.name}-${Date.now()}`,
-        });
-      }
-    });
+      if (!validateFile(file)) return;
 
-    if (newFiles.length > 0) {
-      setUploadedFiles((prev) => [...prev, ...newFiles]);
-    }
+      const id = `${file.name}-${file.size}-${file.lastModified}`;
+      setPendingUploads((prev) => [...prev, { id, file }]);
+      uploadDocument(file, {
+        onSettled: () => {
+          setPendingUploads((prev) => prev.filter((item) => item.id !== id));
+        },
+      });
+    });
   };
 
   const handleDrag = (e: React.DragEvent<HTMLDivElement>) => {
@@ -80,10 +83,7 @@ function UploadDropzone() {
 
   const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     handleFiles(e.target.files);
-  };
-
-  const removeFile = (id: string) => {
-    setUploadedFiles((prev) => prev.filter((f) => f.id !== id));
+    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   return (
@@ -108,6 +108,7 @@ function UploadDropzone() {
           type="button"
           className="mt-4 bg-indigo-600 text-white hover:bg-indigo-700"
           onClick={handleBrowseClick}
+          disabled={!projectId}
         >
           {L.BROWSE}
         </Button>
@@ -118,7 +119,7 @@ function UploadDropzone() {
           accept=".pdf,.docx,.txt"
           onChange={handleFileInputChange}
           className="hidden"
-          aria-label="Upload document files"
+          aria-label={LABELS.REQUIREMENTS.UPLOAD_INPUT_ARIA}
         />
       </div>
 
@@ -128,13 +129,13 @@ function UploadDropzone() {
         </div>
       )}
 
-      {uploadedFiles.length > 0 && (
+      {pendingUploads.length > 0 && (
         <div className="space-y-3">
           <p className="text-sm font-medium text-slate-700">
-            Uploaded Files ({uploadedFiles.length})
+            {LABELS.REQUIREMENTS.DYNAMIC.UPLOADED_COUNT(pendingUploads.length)}
           </p>
           <div className="space-y-2">
-            {uploadedFiles.map((item) => (
+            {pendingUploads.map((item) => (
               <div
                 key={item.id}
                 className="flex items-center justify-between rounded-lg border border-slate-200 bg-slate-50 p-3"
@@ -145,19 +146,12 @@ function UploadDropzone() {
                     <p className="truncate text-sm font-medium text-slate-800">
                       {item.file.name}
                     </p>
-                    <p className="text-xs text-slate-500">
-                      {(item.file.size / 1024).toFixed(2)} KB
-                    </p>
                   </div>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => removeFile(item.id)}
-                  className="rounded-md p-2 text-slate-400 hover:bg-slate-200 hover:text-slate-600 transition-colors"
-                  aria-label={`Remove ${item.file.name}`}
-                >
-                  <X className="size-4" aria-hidden="true" />
-                </button>
+                <Loader2
+                  className="size-4 animate-spin text-slate-400"
+                  aria-hidden="true"
+                />
               </div>
             ))}
           </div>

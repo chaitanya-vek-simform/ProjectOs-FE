@@ -3,8 +3,11 @@ import axios from "axios";
 import { ENV } from "@/lib/env";
 import { tokenStorage } from "@/lib/token-storage";
 
+const REQUEST_TIMEOUT_MS = 30_000;
+
 const api = axios.create({
   baseURL: ENV.API_BASE_URL,
+  timeout: REQUEST_TIMEOUT_MS,
 });
 
 api.interceptors.request.use((config) => {

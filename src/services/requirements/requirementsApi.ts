@@ -2,6 +2,7 @@ import api from "@/services/api";
 import { ENDPOINTS } from "@/constants/endpoints";
 
 import type {
+  DocumentResponse,
   RequirementResponse,
   RequirementUpdate,
   UserStoryResponse,
@@ -10,22 +11,31 @@ import type {
 
 export const requirementsApi = {
   /* Documents */
-  uploadDocument: (projectId: string, file: File): Promise<unknown> => {
+  uploadDocument: (
+    projectId: string,
+    file: File,
+  ): Promise<DocumentResponse> => {
     const formData = new FormData();
     formData.append("file", file);
     return api
-      .post<unknown>(ENDPOINTS.REQUIREMENTS.DOCUMENTS(projectId), formData)
+      .post<DocumentResponse>(
+        ENDPOINTS.REQUIREMENTS.DOCUMENTS(projectId),
+        formData,
+      )
       .then((r) => r.data);
   },
 
-  getDocuments: (projectId: string): Promise<unknown> =>
+  getDocuments: (projectId: string): Promise<DocumentResponse[]> =>
     api
-      .get<unknown>(ENDPOINTS.REQUIREMENTS.DOCUMENTS(projectId))
+      .get<DocumentResponse[]>(ENDPOINTS.REQUIREMENTS.DOCUMENTS(projectId))
       .then((r) => r.data),
 
-  processDocument: (projectId: string, documentId: string): Promise<unknown> =>
+  processDocument: (
+    projectId: string,
+    documentId: string,
+  ): Promise<DocumentResponse> =>
     api
-      .post<unknown>(
+      .post<DocumentResponse>(
         ENDPOINTS.REQUIREMENTS.PROCESS_DOCUMENT(projectId, documentId),
       )
       .then((r) => r.data),
