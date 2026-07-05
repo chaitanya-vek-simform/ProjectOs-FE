@@ -15,4 +15,5 @@ export const ROUTES = {
   MEETINGS: "/meetings",
   RISK: "/risk",
   RESOURCES: "/resources",
+  NOT_FOUND: "/404",
 } as const;
