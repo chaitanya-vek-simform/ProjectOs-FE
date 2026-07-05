@@ -3,6 +3,7 @@ import { Loader2, Sparkles } from "lucide-react";
 import { ProgressBar } from "@/components/common/progress-bar/progress-bar";
 import { StatusBadge } from "@/components/common/status-badge/status-badge";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 import {
   Table,
   TableBody,
@@ -19,10 +20,13 @@ import type { TeamMember } from "@/types/resources";
 const TEAM_LABELS = LABELS.RESOURCES.TEAM_MEMBERS;
 
 interface TeamMembersTableProps {
-  members: TeamMember[];
-  onSuggest: () => void;
-  isSuggesting: boolean;
-  canSuggest: boolean;
+  readonly members: TeamMember[];
+  readonly onSuggest: () => void;
+  readonly isSuggesting: boolean;
+  readonly canSuggest: boolean;
+  readonly isSimERPEnabled?: boolean;
+  readonly onToggleSimERP?: () => void;
+  readonly isSyncingSimERP?: boolean;
 }
 
 function MemberRow({ member }: { member: TeamMember }) {
@@ -84,26 +88,50 @@ function TeamMembersTable({
   onSuggest,
   isSuggesting,
   canSuggest,
+  isSimERPEnabled,
+  onToggleSimERP,
+  isSyncingSimERP,
 }: TeamMembersTableProps) {
   return (
     <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-      <div className="mb-4 flex items-center justify-between">
+      <div className="mb-4 flex items-center justify-between gap-2">
         <h2 className="text-lg font-semibold text-slate-900">
           {TEAM_LABELS.TITLE}
         </h2>
-        <Button
-          type="button"
-          onClick={onSuggest}
-          disabled={isSuggesting || !canSuggest}
-          className="bg-indigo-600 text-white hover:bg-indigo-700"
-        >
-          {isSuggesting ? (
-            <Loader2 className="animate-spin" aria-hidden="true" />
-          ) : (
-            <Sparkles aria-hidden="true" />
+        <div className="flex items-center gap-4">
+          {onToggleSimERP && (
+            <div className="flex items-center gap-2">
+              <label className="text-sm font-medium text-slate-700">
+                {TEAM_LABELS.SYNC_SIMEIP}
+              </label>
+              <Switch
+                checked={isSimERPEnabled ?? false}
+                onCheckedChange={onToggleSimERP}
+                disabled={isSyncingSimERP || !canSuggest}
+                aria-label="Toggle SimERP integration"
+              />
+              {isSyncingSimERP && (
+                <Loader2
+                  className="size-4 animate-spin text-slate-600"
+                  aria-hidden="true"
+                />
+              )}
+            </div>
           )}
-          {TEAM_LABELS.AI_SUGGEST}
-        </Button>
+          <Button
+            type="button"
+            onClick={onSuggest}
+            disabled={isSuggesting || !canSuggest}
+            className="bg-indigo-600 text-white hover:bg-indigo-700"
+          >
+            {isSuggesting ? (
+              <Loader2 className="animate-spin" aria-hidden="true" />
+            ) : (
+              <Sparkles aria-hidden="true" />
+            )}
+            {TEAM_LABELS.AI_SUGGEST}
+          </Button>
+        </div>
       </div>
       <Table>
         <TableHeader>

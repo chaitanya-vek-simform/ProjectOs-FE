@@ -30,4 +30,14 @@ export const projectsApi = {
     api
       .get<ProjectDashboard>(ENDPOINTS.PROJECTS.DASHBOARD(projectId))
       .then((r) => r.data),
+
+  connectERP: (
+    projectId: string,
+    enabled: boolean,
+  ): Promise<{ enabled: boolean }> =>
+    api
+      .patch<{ enabled: boolean }>(ENDPOINTS.PROJECTS.CONNECT_ERP(projectId), {
+        enabled,
+      })
+      .then((r) => r.data),
 };

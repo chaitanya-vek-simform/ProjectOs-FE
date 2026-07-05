@@ -48,3 +48,27 @@ export function useUpdateProject() {
     },
   });
 }
+
+export function useConnectERP() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      projectId,
+      enabled,
+    }: {
+      projectId: string;
+      enabled: boolean;
+    }) => projectsApi.connectERP(projectId, enabled),
+    onSuccess: (_result, { projectId, enabled }) => {
+      void queryClient.invalidateQueries({
+        queryKey: PROJECTS_QUERY_KEYS.DETAIL(projectId),
+      });
+      toast.success(
+        enabled ? "SimERP integration enabled" : "SimERP integration disabled",
+      );
+    },
+    onError: (error: Error) => {
+      toast.error(getErrorMessage(error, "Failed to update SimERP setting"));
+    },
+  });
+}

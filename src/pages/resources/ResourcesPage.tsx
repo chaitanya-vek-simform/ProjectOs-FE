@@ -8,6 +8,8 @@ import { UtilizationHeatmap } from "@/components/resources/utilization-heatmap";
 import { LABELS } from "@/constants/labels";
 import { HEATMAP_WEEK_COUNT } from "@/constants/resources";
 import { useProject } from "@/contexts/useProject";
+import { useConnectERP } from "@/hooks/projects/mutations";
+import { useProject as useProjectDetail } from "@/hooks/projects/queries";
 import { useSuggestTeam } from "@/hooks/resources/mutations";
 import { useTeam, useUtilization } from "@/hooks/resources/queries";
 import {
@@ -22,6 +24,7 @@ const STATE = LABELS.RESOURCES.STATE;
 
 function ResourcesPage() {
   const { projectId, isLoading: isProjectLoading } = useProject();
+  const { data: project } = useProjectDetail(projectId);
   const {
     data: team,
     isLoading: isTeamLoading,
@@ -33,6 +36,7 @@ function ResourcesPage() {
     isError: isUtilizationError,
   } = useUtilization();
   const suggest = useSuggestTeam();
+  const connectERP = useConnectERP();
   const [isSuggestOpen, setIsSuggestOpen] = useState(false);
   // TEMPORARY: locally-added members from Create Team until the endpoint exists.
   const [createdMembers, setCreatedMembers] = useState<TeamMember[]>([]);
@@ -84,6 +88,16 @@ function ResourcesPage() {
     suggest.mutate(projectId);
   };
 
+  const handleSyncSimERP = () => {
+    if (!projectId) return;
+    // Toggle SimERP integration: enable if currently disabled
+    const isCurrentlyEnabled = project?.connect_erp ?? false;
+    connectERP.mutate({
+      projectId,
+      enabled: !isCurrentlyEnabled,
+    });
+  };
+
   // TEMPORARY: add selected members to the table locally. Replace with the
   // Create Team API call + team-query invalidation once the endpoint is ready.
   const handleCreateTeam = (selections: SelectedMember[]) => {
@@ -105,6 +119,9 @@ function ResourcesPage() {
         onSuggest={handleSuggest}
         isSuggesting={suggest.isPending}
         canSuggest={Boolean(projectId)}
+        isSimERPEnabled={project?.connect_erp}
+        onToggleSimERP={handleSyncSimERP}
+        isSyncingSimERP={connectERP.isPending}
       />
       <UtilizationHeatmap rows={heatmapRows} />
       <SuggestTeamDialog

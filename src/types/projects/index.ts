@@ -13,6 +13,7 @@ export interface Project {
   target_end_date: string | null;
   budget_usd: number | null;
   created_at: string;
+  connect_erp?: boolean;
 }
 
 /** Body for creating a project (`POST /projects`). */

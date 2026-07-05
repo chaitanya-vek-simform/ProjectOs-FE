@@ -12,6 +12,7 @@ export const ENDPOINTS = {
     LIST: "/projects",
     DETAIL: (projectId: string) => `/projects/${projectId}`,
     DASHBOARD: (projectId: string) => `/projects/${projectId}/dashboard`,
+    CONNECT_ERP: (projectId: string) => `/projects/${projectId}/connect-erp`,
   },
   REQUIREMENTS: {
     DOCUMENTS: (projectId: string) => `/projects/${projectId}/documents`,

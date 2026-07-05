@@ -20,6 +20,8 @@ export const RESOURCES_LABELS = {
   TEAM_MEMBERS: {
     TITLE: "Team Members",
     AI_SUGGEST: "AI Suggest Team →",
+    SYNC_SIMEIP: "Sync from SimERP",
+    SYNCING: "Syncing…",
     COLUMN_NAME: "Name",
     COLUMN_ROLE: "Role",
     COLUMN_SKILLS: "Skills",
