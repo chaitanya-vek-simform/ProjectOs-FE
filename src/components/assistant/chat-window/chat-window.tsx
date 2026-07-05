@@ -1,6 +1,17 @@
 import { useEffect, useRef } from "react";
 import { Bot, Loader2, RotateCcw, X } from "lucide-react";
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { LABELS } from "@/constants/labels";
 
@@ -74,19 +85,38 @@ function ChatWindow({
           </p>
           <p className="truncate text-xs text-slate-500">{WINDOW.SUBTITLE}</p>
         </div>
-        <Button
-          size="icon-sm"
-          variant="ghost"
-          onClick={onReset}
-          aria-label={WINDOW.RESET_ARIA}
-          disabled={messages.length === 0 || isClearing || isStreaming}
-        >
-          {isClearing ? (
-            <Loader2 className="animate-spin" aria-hidden="true" />
-          ) : (
-            <RotateCcw aria-hidden="true" />
-          )}
-        </Button>
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button
+              size="icon-sm"
+              variant="ghost"
+              aria-label={WINDOW.RESET_ARIA}
+              disabled={messages.length === 0 || isClearing || isStreaming}
+            >
+              {isClearing ? (
+                <Loader2 className="animate-spin" aria-hidden="true" />
+              ) : (
+                <RotateCcw aria-hidden="true" />
+              )}
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>{WINDOW.RESET_CONFIRM_TITLE}</AlertDialogTitle>
+              <AlertDialogDescription>
+                {WINDOW.RESET_CONFIRM_DESCRIPTION}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>
+                {WINDOW.RESET_CONFIRM_CANCEL}
+              </AlertDialogCancel>
+              <AlertDialogAction onClick={onReset}>
+                {WINDOW.RESET_CONFIRM_ACTION}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
         <Button
           size="icon-sm"
           variant="ghost"

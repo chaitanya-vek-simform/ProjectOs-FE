@@ -9,6 +9,11 @@ export const ASSISTANT_LABELS = {
     SUBTITLE: "Ask anything about your projects.",
     CLOSE_ARIA: "Close chat",
     RESET_ARIA: "Clear chat history",
+    RESET_CONFIRM_TITLE: "Clear conversation?",
+    RESET_CONFIRM_DESCRIPTION:
+      "This will permanently clear your conversation for this project. This action cannot be undone.",
+    RESET_CONFIRM_ACTION: "Yes, clear",
+    RESET_CONFIRM_CANCEL: "Cancel",
     LOADING_HISTORY: "Loading your conversation…",
   },
   EMPTY: {
