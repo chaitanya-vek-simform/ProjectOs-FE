@@ -51,6 +51,10 @@ export const RESOURCES_QUERY_KEYS = {
   UTILIZATION: ["resources", "utilization"] as const,
 };
 
+export const PROJECT_TEAM_QUERY_KEYS = {
+  DETAIL: (projectId: string) => ["project-team", projectId] as const,
+};
+
 export const ASSISTANT_QUERY_KEYS = {
   HISTORY: (projectId: string) => ["assistant", projectId, "history"] as const,
 };

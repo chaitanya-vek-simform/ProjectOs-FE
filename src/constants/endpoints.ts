@@ -61,6 +61,15 @@ export const ENDPOINTS = {
     UTILIZATION: "/resources/utilization",
     SUGGEST: (projectId: string) => `/projects/${projectId}/resources/suggest`,
   },
+  TEAM: {
+    /** Save (replace), get, or clear the persisted project team. */
+    ROOT: (projectId: string) => `/projects/${projectId}/team`,
+    /** Add a single member to the team. */
+    MEMBERS: (projectId: string) => `/projects/${projectId}/team/members`,
+    /** Update or remove one saved team member. */
+    MEMBER: (projectId: string, memberId: string) =>
+      `/projects/${projectId}/team/members/${memberId}`,
+  },
   ASSISTANT: {
     /** Project-scoped streaming chat. Emits Server-Sent Events (sources → token* → done). */
     CHAT_STREAM: (projectId: string) => `/projects/${projectId}/chat/stream`,

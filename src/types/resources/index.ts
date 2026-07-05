@@ -27,11 +27,33 @@ export interface UtilizationResponse {
   estimated_utilization_pct: number;
 }
 
+/** Multi-facet ratings for a suggested member. */
+export interface SuggestedMemberRatings {
+  overall: number;
+  ai: number;
+  communication: number;
+}
+
 /** A member suggested for a role inside `recommendations`. */
 export interface SuggestedMember {
   id: string;
   name: string;
   skills: string[];
+  role?: string;
+  experience_years?: number;
+  hourly_rate?: number;
+  match_score?: number;
+  rationale?: string;
+  avatar_url?: string;
+  designation?: string;
+  department?: string;
+  stack?: string;
+  availability_pct?: number;
+  current_allocation_pct?: number;
+  on_leave?: boolean;
+  in_notice_period?: boolean;
+  is_contractor?: boolean;
+  ratings?: SuggestedMemberRatings;
 }
 
 /** One role recommendation from the AI suggest endpoint. */
@@ -39,13 +61,68 @@ export interface SuggestRecommendation {
   role: string;
   count_needed: number;
   suggested_members: SuggestedMember[];
+  gap?: string | null;
 }
 
 /** AI team suggestion (`POST /projects/{id}/resources/suggest`). */
 export interface SuggestTeamResponse {
   total_story_points: number;
   estimated_sprints: number;
+  method?: string;
+  source?: string;
+  summary?: string;
   recommendations: SuggestRecommendation[];
+}
+
+/* -------------------------------------------------------------------------- */
+/* Project team persistence (`/projects/{id}/team`)                           */
+/* -------------------------------------------------------------------------- */
+
+/** Where a saved team member originated. */
+export type TeamMemberSource = "internal" | "simerp";
+
+/** Profile snapshot sent when saving/adding a member. */
+export interface TeamMemberInput {
+  member_ref: string;
+  source: TeamMemberSource;
+  name: string;
+  role: string;
+  email?: string | null;
+  designation?: string | null;
+  department?: string | null;
+  stack?: string | null;
+  skills: string[];
+  experience_years?: number | null;
+  hourly_rate?: number | null;
+  availability_pct?: number | null;
+  current_allocation_pct?: number | null;
+  on_leave?: boolean | null;
+  in_notice_period?: boolean | null;
+  is_contractor?: boolean | null;
+  ratings?: Record<string, number> | null;
+  match_score?: number | null;
+  rationale?: string | null;
+  avatar_url?: string | null;
+  allocation_pct?: number;
+}
+
+/** Partial update for a saved team member (`PATCH .../members/{id}`). */
+export type TeamMemberUpdate = Partial<
+  Omit<TeamMemberInput, "member_ref" | "source">
+>;
+
+/** A persisted team member as returned by the team endpoints. */
+export interface SavedTeamMember extends TeamMemberInput {
+  id: string;
+  project_id: string;
+  created_at: string;
+}
+
+/** The saved team for a project (`GET/POST /projects/{id}/team`). */
+export interface ProjectTeamResponse {
+  project_id: string;
+  member_count: number;
+  members: SavedTeamMember[];
 }
 
 /* -------------------------------------------------------------------------- */
@@ -99,14 +176,14 @@ export interface HeatmapRow {
 /* Transforms (wire shape → view model)                                       */
 /* -------------------------------------------------------------------------- */
 
-const AVATAR_TONES: AvatarTone[] = [
+export const AVATAR_TONES: AvatarTone[] = [
   "bg-purple-500",
   "bg-blue-500",
   "bg-pink-500",
   "bg-emerald-500",
 ];
 
-interface UtilizationPresentation {
+export interface UtilizationPresentation {
   value: number;
   fill: string;
   labelClass: string;
@@ -118,7 +195,9 @@ interface UtilizationPresentation {
  * returns an explicit status, so it is inferred from the utilization band:
  * >100% overloaded, 80–100% near capacity, 1–79% available, 0% blocked.
  */
-function toUtilizationPresentation(pct: number): UtilizationPresentation {
+export function toUtilizationPresentation(
+  pct: number,
+): UtilizationPresentation {
   if (pct > 100) {
     return {
       value: 100,
@@ -152,37 +231,6 @@ function toUtilizationPresentation(pct: number): UtilizationPresentation {
 }
 
 /**
- * Merge the team roster with the utilization list (joined on member id ↔
- * user_id) into the Team Members table view model. Members without a matching
- * utilization row default to 0%.
- */
-export function toTeamMembers(
-  team: TeamMemberResponse[],
-  utilization: UtilizationResponse[],
-): TeamMember[] {
-  const pctByUser = new Map(
-    utilization.map((u) => [u.user_id, u.estimated_utilization_pct]),
-  );
-  return team.map((member, index) => {
-    const pct = pctByUser.get(member.id) ?? 0;
-    const presentation = toUtilizationPresentation(pct);
-    return {
-      id: member.id,
-      name: member.name,
-      role: member.role,
-      skills: member.skills,
-      ratePerDay: `$${member.hourly_rate}`,
-      avatarTone: AVATAR_TONES[index % AVATAR_TONES.length],
-      utilizationValue: presentation.value,
-      utilizationFill: presentation.fill,
-      utilizationLabel: `${pct}%`,
-      utilizationLabelClass: presentation.labelClass,
-      status: presentation.status,
-    };
-  });
-}
-
-/**
  * Build heatmap rows from the utilization list. No weekly series is available,
  * so the real aggregate utilization occupies the first week column and the
  * remaining weeks render as empty cells.
@@ -197,29 +245,6 @@ export function toHeatmapRows(
     cells: Array.from({ length: weekCount }, (_, index): HeatmapCellValue =>
       index === 0 ? u.estimated_utilization_pct : null,
     ),
-  }));
-}
-
-/**
- * TEMPORARY: build Team Members rows from a freshly created selection so the
- * new members render immediately. Replace with a refetch of `useTeam` once the
- * Create Team endpoint is wired.
- */
-export function toCreatedTeamMembers(
-  selections: SelectedMember[],
-): TeamMember[] {
-  return selections.map((selection, index) => ({
-    id: selection.member.id,
-    name: selection.member.name,
-    role: formatRoleLabel(selection.role),
-    skills: selection.member.skills,
-    ratePerDay: "—",
-    avatarTone: AVATAR_TONES[index % AVATAR_TONES.length],
-    utilizationValue: 0,
-    utilizationFill: "bg-slate-300",
-    utilizationLabel: "—",
-    utilizationLabelClass: "text-slate-400",
-    status: { tone: "neutral", label: RES.STATUS.AVAILABLE },
   }));
 }
 

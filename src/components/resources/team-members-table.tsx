@@ -1,4 +1,4 @@
-import { Loader2, Sparkles } from "lucide-react";
+import { Loader2, Sparkles, Trash2 } from "lucide-react";
 
 import { ProgressBar } from "@/components/common/progress-bar/progress-bar";
 import { StatusBadge } from "@/components/common/status-badge/status-badge";
@@ -27,9 +27,22 @@ interface TeamMembersTableProps {
   readonly isSimERPEnabled?: boolean;
   readonly onToggleSimERP?: () => void;
   readonly isSyncingSimERP?: boolean;
+  readonly onRemoveMember?: (memberId: string) => void;
+  readonly removingMemberId?: string;
+  readonly emptyMessage?: string;
 }
 
-function MemberRow({ member }: { member: TeamMember }) {
+function MemberRow({
+  member,
+  onRemove,
+  isRemoving,
+  showActions,
+}: {
+  readonly member: TeamMember;
+  readonly onRemove?: (memberId: string) => void;
+  readonly isRemoving: boolean;
+  readonly showActions: boolean;
+}) {
   return (
     <TableRow>
       <TableCell>
@@ -79,6 +92,27 @@ function MemberRow({ member }: { member: TeamMember }) {
           {member.status.label}
         </StatusBadge>
       </TableCell>
+      {showActions && (
+        <TableCell className="text-right">
+          {onRemove && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={() => onRemove(member.id)}
+              disabled={isRemoving}
+              aria-label={TEAM_LABELS.REMOVE}
+              className="text-slate-400 hover:text-red-600"
+            >
+              {isRemoving ? (
+                <Loader2 className="animate-spin" aria-hidden="true" />
+              ) : (
+                <Trash2 className="size-4" aria-hidden="true" />
+              )}
+            </Button>
+          )}
+        </TableCell>
+      )}
     </TableRow>
   );
 }
@@ -91,7 +125,12 @@ function TeamMembersTable({
   isSimERPEnabled,
   onToggleSimERP,
   isSyncingSimERP,
+  onRemoveMember,
+  removingMemberId,
+  emptyMessage,
 }: TeamMembersTableProps) {
+  const showActions = Boolean(onRemoveMember);
+  const columnCount = showActions ? 7 : 6;
   return (
     <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
       <div className="mb-4 flex items-center justify-between gap-2">
@@ -142,12 +181,34 @@ function TeamMembersTable({
             <TableHead>{TEAM_LABELS.COLUMN_RATE}</TableHead>
             <TableHead>{TEAM_LABELS.COLUMN_UTILIZATION}</TableHead>
             <TableHead>{TEAM_LABELS.COLUMN_STATUS}</TableHead>
+            {showActions && (
+              <TableHead className="text-right">
+                {TEAM_LABELS.COLUMN_ACTIONS}
+              </TableHead>
+            )}
           </TableRow>
         </TableHeader>
         <TableBody>
-          {members.map((member) => (
-            <MemberRow key={member.id} member={member} />
-          ))}
+          {members.length === 0 ? (
+            <TableRow>
+              <TableCell
+                colSpan={columnCount}
+                className="py-10 text-center text-sm text-slate-400"
+              >
+                {emptyMessage ?? TEAM_LABELS.EMPTY}
+              </TableCell>
+            </TableRow>
+          ) : (
+            members.map((member) => (
+              <MemberRow
+                key={member.id}
+                member={member}
+                onRemove={onRemoveMember}
+                isRemoving={removingMemberId === member.id}
+                showActions={showActions}
+              />
+            ))
+          )}
         </TableBody>
       </Table>
     </div>

@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Loader2 } from "lucide-react";
-import { toast } from "sonner";
 
 import { SuggestTeamDialog } from "@/components/resources/suggest-team-dialog";
 import { TeamMembersTable } from "@/components/resources/team-members-table";
@@ -10,15 +9,17 @@ import { HEATMAP_WEEK_COUNT } from "@/constants/resources";
 import { useProject } from "@/contexts/useProject";
 import { useConnectERP } from "@/hooks/projects/mutations";
 import { useProject as useProjectDetail } from "@/hooks/projects/queries";
-import { useSuggestTeam } from "@/hooks/resources/mutations";
-import { useTeam, useUtilization } from "@/hooks/resources/queries";
 import {
-  toCreatedTeamMembers,
-  toHeatmapRows,
-  toTeamMembers,
-  type SelectedMember,
-  type TeamMember,
-} from "@/types/resources";
+  useRemoveTeamMember,
+  useSaveTeam,
+  useSuggestTeam,
+} from "@/hooks/resources/mutations";
+import { useProjectTeam, useUtilization } from "@/hooks/resources/queries";
+import { toHeatmapRows, type SelectedMember } from "@/types/resources";
+import {
+  savedTeamToTableRows,
+  toSaveTeamPayload,
+} from "@/types/resources/team";
 
 const STATE = LABELS.RESOURCES.STATE;
 
@@ -26,10 +27,10 @@ function ResourcesPage() {
   const { projectId, isLoading: isProjectLoading } = useProject();
   const { data: project } = useProjectDetail(projectId);
   const {
-    data: team,
+    data: projectTeam,
     isLoading: isTeamLoading,
     isError: isTeamError,
-  } = useTeam();
+  } = useProjectTeam(projectId);
   const {
     data: utilization,
     isLoading: isUtilizationLoading,
@@ -37,9 +38,9 @@ function ResourcesPage() {
   } = useUtilization();
   const suggest = useSuggestTeam();
   const connectERP = useConnectERP();
+  const saveTeam = useSaveTeam();
+  const removeMember = useRemoveTeamMember();
   const [isSuggestOpen, setIsSuggestOpen] = useState(false);
-  // TEMPORARY: locally-added members from Create Team until the endpoint exists.
-  const [createdMembers, setCreatedMembers] = useState<TeamMember[]>([]);
 
   if (isProjectLoading || isTeamLoading || isUtilizationLoading) {
     return (
@@ -65,21 +66,9 @@ function ResourcesPage() {
     );
   }
 
-  if (!team || team.length === 0) {
-    return (
-      <div className="flex min-h-[600px] items-center justify-center">
-        <div className="rounded-xl border border-slate-200 bg-white p-8 text-center shadow-sm">
-          <p className="text-sm font-semibold text-slate-900">
-            {STATE.EMPTY_TITLE}
-          </p>
-          <p className="mt-1 text-sm text-slate-400">{STATE.EMPTY_BODY}</p>
-        </div>
-      </div>
-    );
-  }
-
+  const savedMembers = projectTeam?.members ?? [];
+  const members = savedTeamToTableRows(savedMembers);
   const utilizationList = utilization ?? [];
-  const members = [...toTeamMembers(team, utilizationList), ...createdMembers];
   const heatmapRows = toHeatmapRows(utilizationList, HEATMAP_WEEK_COUNT);
 
   const handleSuggest = () => {
@@ -88,29 +77,28 @@ function ResourcesPage() {
     suggest.mutate(projectId);
   };
 
-  const handleSyncSimERP = () => {
+  const handleToggleSimERP = () => {
     if (!projectId) return;
-    // Toggle SimERP integration: enable if currently disabled
     const isCurrentlyEnabled = project?.connect_erp ?? false;
-    connectERP.mutate({
-      projectId,
-      enabled: !isCurrentlyEnabled,
-    });
+    connectERP.mutate({ projectId, enabled: !isCurrentlyEnabled });
   };
 
-  // TEMPORARY: add selected members to the table locally. Replace with the
-  // Create Team API call + team-query invalidation once the endpoint is ready.
   const handleCreateTeam = (selections: SelectedMember[]) => {
-    setCreatedMembers((prev) => {
-      const existingIds = new Set(prev.map((m) => m.id));
-      const additions = toCreatedTeamMembers(selections).filter(
-        (m) => !existingIds.has(m.id),
-      );
-      return [...prev, ...additions];
-    });
-    setIsSuggestOpen(false);
-    toast.success(LABELS.RESOURCES.SUGGEST.CREATE_SUCCESS);
+    if (!projectId) return;
+    const source = suggest.data?.source === "simerp" ? "simerp" : "internal";
+    const { members: payload } = toSaveTeamPayload(selections, source);
+    saveTeam.mutate(
+      { projectId, members: payload },
+      { onSuccess: () => setIsSuggestOpen(false) },
+    );
   };
+
+  const handleRemoveMember = (memberId: string) => {
+    if (!projectId) return;
+    removeMember.mutate({ projectId, memberId });
+  };
+
+  const hasTeam = members.length > 0;
 
   return (
     <div className="space-y-5">
@@ -120,8 +108,13 @@ function ResourcesPage() {
         isSuggesting={suggest.isPending}
         canSuggest={Boolean(projectId)}
         isSimERPEnabled={project?.connect_erp}
-        onToggleSimERP={handleSyncSimERP}
+        onToggleSimERP={handleToggleSimERP}
         isSyncingSimERP={connectERP.isPending}
+        emptyMessage={hasTeam ? undefined : STATE.EMPTY_BODY}
+        onRemoveMember={hasTeam ? handleRemoveMember : undefined}
+        removingMemberId={
+          removeMember.isPending ? removeMember.variables?.memberId : undefined
+        }
       />
       <UtilizationHeatmap rows={heatmapRows} />
       <SuggestTeamDialog
@@ -130,7 +123,7 @@ function ResourcesPage() {
         data={suggest.data}
         isLoading={suggest.isPending}
         onCreateTeam={handleCreateTeam}
-        isCreating={false}
+        isCreating={saveTeam.isPending}
       />
     </div>
   );

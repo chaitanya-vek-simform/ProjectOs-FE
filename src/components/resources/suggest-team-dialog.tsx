@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { Loader2 } from "lucide-react";
+import { Database, Loader2, Sparkles, Users } from "lucide-react";
 
 import { StatusBadge } from "@/components/common/status-badge/status-badge";
+import { SuggestMemberCard } from "@/components/resources/suggest-member-card";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -12,9 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Skeleton } from "@/components/ui/skeleton";
 import { LABELS } from "@/constants/labels";
-import { getFallbackSuggestedMembers } from "@/constants/resources";
 import { cn } from "@/lib/utils";
 import {
   formatRoleLabel,
@@ -26,149 +24,132 @@ import {
 
 const SUGGEST_LABELS = LABELS.RESOURCES.SUGGEST;
 
-interface SuggestTeamDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  data?: SuggestTeamResponse;
-  isLoading: boolean;
-  onCreateTeam: (selections: SelectedMember[]) => void;
-  isCreating: boolean;
-}
-
-function MemberSelectCard({
-  member,
-  checked,
-  disabled,
-  onToggle,
-}: {
-  member: SuggestedMember;
-  checked: boolean;
-  disabled: boolean;
-  onToggle: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onToggle}
-      disabled={disabled}
-      aria-pressed={checked}
-      className={cn(
-        "flex w-full items-start gap-3 rounded-lg border p-3 text-left transition-colors",
-        checked
-          ? "border-indigo-500 bg-indigo-50"
-          : "border-slate-200 hover:border-slate-300",
-        disabled && "cursor-not-allowed opacity-50",
-      )}
-    >
-      <Checkbox
-        checked={checked}
-        disabled={disabled}
-        className="pointer-events-none mt-0.5"
-        tabIndex={-1}
-        aria-hidden="true"
-      />
-      <div className="min-w-0">
-        <p className="text-sm font-medium text-slate-900">{member.name}</p>
-        <div className="mt-1 flex flex-wrap gap-1">
-          {member.skills.map((skill) => (
-            <span
-              key={`${member.id}-${skill}`}
-              className="rounded bg-slate-100 px-2 py-0.5 text-xs text-slate-600"
-            >
-              {skill}
-            </span>
-          ))}
-        </div>
-      </div>
-    </button>
-  );
-}
-
 function RecommendationCard({
   recommendation,
   selected,
   onToggle,
 }: {
-  recommendation: SuggestRecommendation;
-  selected: SuggestedMember[];
-  onToggle: (role: string, member: SuggestedMember, cap: number) => void;
+  readonly recommendation: SuggestRecommendation;
+  readonly selected: SuggestedMember[];
+  readonly onToggle: (
+    role: string,
+    member: SuggestedMember,
+    cap: number,
+  ) => void;
 }) {
-  // TEMPORARY: fall back to static candidates when the API returns none.
-  const members =
-    recommendation.suggested_members.length > 0
-      ? recommendation.suggested_members
-      : getFallbackSuggestedMembers(recommendation.role);
+  const members = recommendation.suggested_members;
   const cap = recommendation.count_needed;
   const selectedIds = new Set(selected.map((m) => m.id));
   const capReached = selected.length >= cap;
 
   return (
-    <div className="rounded-lg border border-slate-200 p-4">
-      <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-slate-900">
-          {formatRoleLabel(recommendation.role)}
-        </h3>
+    <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          <Users className="size-4 text-indigo-500" aria-hidden="true" />
+          <h3 className="text-sm font-semibold text-slate-900">
+            {formatRoleLabel(recommendation.role)}
+          </h3>
+        </div>
         <StatusBadge tone="info">
           {SUGGEST_LABELS.COUNT_NEEDED}: {cap}
         </StatusBadge>
       </div>
-      <p className="mt-3 text-xs font-medium text-slate-500">
-        {SUGGEST_LABELS.SUGGESTED_MEMBERS} · {selected.length}/{cap}{" "}
-        {SUGGEST_LABELS.SELECTED}
-      </p>
-      <div className="mt-2 grid gap-2 sm:grid-cols-2">
-        {members.map((member) => (
-          <MemberSelectCard
-            key={member.id}
-            member={member}
-            checked={selectedIds.has(member.id)}
-            disabled={capReached && !selectedIds.has(member.id)}
-            onToggle={() => onToggle(recommendation.role, member, cap)}
-          />
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function SuggestSkeleton() {
-  return (
-    <div className="space-y-4">
-      <div className="grid grid-cols-2 gap-3">
-        <Skeleton className="h-16 rounded-lg" />
-        <Skeleton className="h-16 rounded-lg" />
-      </div>
-      <div className="space-y-3">
-        {[0, 1, 2].map((row) => (
-          <div key={row} className="rounded-lg border border-slate-200 p-4">
-            <div className="flex items-center justify-between">
-              <Skeleton className="h-4 w-32" />
-              <Skeleton className="h-5 w-20 rounded-full" />
-            </div>
-            <Skeleton className="mt-3 h-3 w-28" />
-            <Skeleton className="mt-2 h-4 w-full" />
+      {members.length > 0 ? (
+        <>
+          <p className="mt-3 text-xs font-medium text-slate-500">
+            {SUGGEST_LABELS.SUGGESTED_MEMBERS} ·{" "}
+            <span
+              className={cn(
+                selected.length === cap && "font-semibold text-emerald-600",
+              )}
+            >
+              {selected.length}/{cap} {SUGGEST_LABELS.SELECTED}
+            </span>
+          </p>
+          <div className="mt-2 flex flex-col gap-3">
+            {members.map((member) => (
+              <SuggestMemberCard
+                key={member.id}
+                member={member}
+                checked={selectedIds.has(member.id)}
+                disabled={capReached && !selectedIds.has(member.id)}
+                onToggle={() => onToggle(recommendation.role, member, cap)}
+              />
+            ))}
           </div>
-        ))}
+        </>
+      ) : (
+        <p className="mt-3 rounded-lg bg-slate-50 p-3 text-xs text-slate-400">
+          {recommendation.gap ?? SUGGEST_LABELS.NO_MEMBERS}
+        </p>
+      )}
+    </div>
+  );
+}
+
+function SuggestLoading() {
+  return (
+    <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
+      <div className="relative">
+        <div className="absolute inset-0 animate-ping rounded-full bg-indigo-200 opacity-60" />
+        <div className="relative flex size-14 items-center justify-center rounded-full bg-indigo-100">
+          <Loader2
+            className="size-7 animate-spin text-indigo-600"
+            aria-hidden="true"
+          />
+        </div>
+      </div>
+      <div>
+        <p className="text-sm font-semibold text-slate-900">
+          {SUGGEST_LABELS.LOADING}
+        </p>
+        <p className="mt-1 text-xs text-slate-500">
+          {SUGGEST_LABELS.LOADING_BODY}
+        </p>
       </div>
     </div>
   );
 }
 
-function SuggestSummary({ data }: { data: SuggestTeamResponse }) {
+function SuggestSummary({ data }: { readonly data: SuggestTeamResponse }) {
+  const isSimERP = data.source === "simerp";
   return (
-    <div className="grid grid-cols-2 gap-3">
-      <div className="rounded-lg bg-slate-50 p-3">
-        <p className="text-xs text-slate-500">{SUGGEST_LABELS.STORY_POINTS}</p>
-        <p className="text-lg font-semibold text-slate-900">
-          {data.total_story_points}
-        </p>
+    <div className="space-y-3">
+      <div className="grid grid-cols-2 gap-3">
+        <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+          <p className="text-xs text-slate-500">
+            {SUGGEST_LABELS.STORY_POINTS}
+          </p>
+          <p className="text-xl font-bold text-slate-900">
+            {data.total_story_points}
+          </p>
+        </div>
+        <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+          <p className="text-xs text-slate-500">{SUGGEST_LABELS.SPRINTS}</p>
+          <p className="text-xl font-bold text-slate-900">
+            {data.estimated_sprints}
+          </p>
+        </div>
       </div>
-      <div className="rounded-lg bg-slate-50 p-3">
-        <p className="text-xs text-slate-500">{SUGGEST_LABELS.SPRINTS}</p>
-        <p className="text-lg font-semibold text-slate-900">
-          {data.estimated_sprints}
+      {data.source && (
+        <span
+          className={cn(
+            "inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ring-1 ring-inset",
+            isSimERP
+              ? "bg-emerald-50 text-emerald-700 ring-emerald-200"
+              : "bg-slate-100 text-slate-600 ring-slate-200",
+          )}
+        >
+          <Database className="size-3.5" aria-hidden="true" />
+          {!isSimERP && SUGGEST_LABELS.SOURCE_LOCAL}
+        </span>
+      )}
+      {data.summary && (
+        <p className="rounded-xl border border-indigo-100 bg-indigo-50/50 p-3 text-xs leading-relaxed text-slate-600">
+          {data.summary}
         </p>
-      </div>
+      )}
     </div>
   );
 }
@@ -179,13 +160,17 @@ function SuggestBody({
   selectedByRole,
   onToggle,
 }: {
-  data?: SuggestTeamResponse;
-  isLoading: boolean;
-  selectedByRole: Record<string, SuggestedMember[]>;
-  onToggle: (role: string, member: SuggestedMember, cap: number) => void;
+  readonly data?: SuggestTeamResponse;
+  readonly isLoading: boolean;
+  readonly selectedByRole: Record<string, SuggestedMember[]>;
+  readonly onToggle: (
+    role: string,
+    member: SuggestedMember,
+    cap: number,
+  ) => void;
 }) {
   if (isLoading) {
-    return <SuggestSkeleton />;
+    return <SuggestLoading />;
   }
 
   if (!data) {
@@ -224,7 +209,14 @@ function SuggestTeamDialog({
   isLoading,
   onCreateTeam,
   isCreating,
-}: SuggestTeamDialogProps) {
+}: {
+  readonly open: boolean;
+  readonly onOpenChange: (open: boolean) => void;
+  readonly data?: SuggestTeamResponse;
+  readonly isLoading: boolean;
+  readonly onCreateTeam: (selections: SelectedMember[]) => void;
+  readonly isCreating: boolean;
+}) {
   const [selectedByRole, setSelectedByRole] = useState<
     Record<string, SuggestedMember[]>
   >({});
@@ -232,11 +224,6 @@ function SuggestTeamDialog({
   const handleOpenChange = (next: boolean) => {
     if (!next) setSelectedByRole({});
     onOpenChange(next);
-  };
-
-  const handleCreate = () => {
-    onCreateTeam(selections);
-    setSelectedByRole({});
   };
 
   const toggleMember = (role: string, member: SuggestedMember, cap: number) => {
@@ -254,15 +241,23 @@ function SuggestTeamDialog({
     ([role, members]) => members.map((member) => ({ role, member })),
   );
 
+  const handleCreate = () => {
+    onCreateTeam(selections);
+    setSelectedByRole({});
+  };
+
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="flex max-h-[85vh] flex-col sm:max-w-2xl">
+      <DialogContent className="flex max-h-[88vh] flex-col sm:max-w-3xl">
         <DialogHeader>
-          <DialogTitle>{SUGGEST_LABELS.TITLE}</DialogTitle>
+          <DialogTitle className="flex items-center gap-2">
+            <Sparkles className="size-5 text-indigo-500" aria-hidden="true" />
+            {SUGGEST_LABELS.TITLE}
+          </DialogTitle>
           <DialogDescription>{SUGGEST_LABELS.DESCRIPTION}</DialogDescription>
         </DialogHeader>
 
-        <div className="flex-1 space-y-4 overflow-y-auto">
+        <div className="flex-1 space-y-4 overflow-y-auto pr-1">
           <SuggestBody
             data={data}
             isLoading={isLoading}
@@ -272,7 +267,10 @@ function SuggestTeamDialog({
         </div>
 
         {data && !isLoading ? (
-          <DialogFooter>
+          <DialogFooter className="items-center sm:justify-between">
+            <p className="text-xs text-slate-500">
+              {selections.length} {SUGGEST_LABELS.SELECTED}
+            </p>
             <Button
               type="button"
               onClick={handleCreate}
