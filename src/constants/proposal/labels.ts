@@ -86,6 +86,9 @@ export const PROPOSAL_LABELS = {
     TITLE: "Proposed Architecture",
     RATIONALE_LABEL: "Rationale",
     COMPONENTS_LABEL: "Components",
+    DIAGRAM_LABEL: "Architecture Diagram",
+    DIAGRAM_ARIA: "Architecture diagram",
+    DIAGRAM_ERROR: "The architecture diagram could not be rendered.",
     EMPTY: "Architecture details are not available yet.",
   },
   TEAM_COMPOSITION: {

@@ -1,5 +1,6 @@
 import { Plus, Trash2 } from "lucide-react";
 
+import { MermaidDiagram } from "@/components/common/mermaid-diagram/mermaid-diagram";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -26,6 +27,7 @@ function ArchitectureOverview({
   const current: ArchitectureOverviewData = architecture ?? {
     rationale: "",
     components: [],
+    diagramMermaid: "",
   };
 
   if (isEditing) {
@@ -130,6 +132,18 @@ function ArchitectureOverview({
         <p className="leading-relaxed text-slate-700">
           {architecture.rationale}
         </p>
+      )}
+      {architecture.diagramMermaid && (
+        <div>
+          <p className="mb-2 text-xs font-medium text-slate-500">
+            {ARCHITECTURE.DIAGRAM_LABEL}
+          </p>
+          <MermaidDiagram
+            chart={architecture.diagramMermaid}
+            ariaLabel={ARCHITECTURE.DIAGRAM_ARIA}
+            errorMessage={ARCHITECTURE.DIAGRAM_ERROR}
+          />
+        </div>
       )}
       {architecture.components.length > 0 && (
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">

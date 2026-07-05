@@ -23,6 +23,7 @@ export function fromArchitectureOverview(
       purpose: component.purpose,
       technology: component.technology,
     })),
+    diagram_mermaid: architecture.diagramMermaid,
   };
 }
 
@@ -82,7 +83,11 @@ export function toProposalDraft(proposal: Proposal): ProposalDraft {
   return {
     executiveSummary: proposal.executiveSummaryParagraphs.join("\n\n"),
     technicalApproach: proposal.technicalApproachParagraphs.join("\n\n"),
-    architecture: proposal.architecture ?? { rationale: "", components: [] },
+    architecture: proposal.architecture ?? {
+      rationale: "",
+      components: [],
+      diagramMermaid: "",
+    },
     teamComposition: proposal.teamComposition,
     timeline: proposal.timeline,
     costBreakdown: proposal.costBreakdown,

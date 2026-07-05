@@ -93,6 +93,8 @@ export interface ArchitectureComponent {
 export interface ArchitectureOverview {
   rationale: string;
   components: ArchitectureComponent[];
+  /** Raw Mermaid flowchart source for the architecture diagram, if provided. */
+  diagramMermaid: string;
 }
 
 /** A single role in the proposed team composition. */
@@ -200,9 +202,10 @@ function toArchitectureOverview(
       purpose: toStringField(component.purpose),
       technology: toStringField(component.technology),
     }));
+  const diagramMermaid = toStringField(architecture.diagram_mermaid);
 
-  if (!rationale && components.length === 0) return null;
-  return { rationale, components };
+  if (!rationale && components.length === 0 && !diagramMermaid) return null;
+  return { rationale, components, diagramMermaid };
 }
 
 /** Best-effort parse of an untyped `team_composition` entry. */
