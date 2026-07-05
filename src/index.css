@@ -534,3 +534,39 @@ body {
 [data-sonner-toast][data-type="info"] [data-icon] svg {
   color: var(--toast-info-icon) !important;
 }
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   PRINT — proposal export
+   `window.print()` (ProposalPage) relies on this to render only the proposal
+   document, so the PDF is a pixel-exact match of the on-screen UI.
+   ───────────────────────────────────────────────────────────────────────────── */
+@media print {
+  /* Hide everything, then reveal only the proposal document subtree. */
+  body * {
+    visibility: hidden;
+  }
+
+  [data-proposal-print],
+  [data-proposal-print] * {
+    visibility: visible;
+  }
+
+  [data-proposal-print] {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    /* Force background/token colors to print (Card bg, status-badge tones). */
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Keep cards/sections from being sliced across page boundaries. */
+  [data-proposal-print] .break-inside-avoid {
+    break-inside: avoid;
+  }
+}
+
+@page {
+  margin: 16mm;
+}
