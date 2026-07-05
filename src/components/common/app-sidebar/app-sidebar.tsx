@@ -2,7 +2,9 @@ import { LogOut, Zap } from "lucide-react";
 import { NavLink } from "react-router-dom";
 
 import { cn, getInitials } from "@/lib/utils";
+import { useAuth } from "@/contexts/useAuth";
 import { useProject } from "@/contexts/useProject";
+import { useCurrentUser } from "@/hooks/auth/queries";
 import { useMeetings } from "@/hooks/meetings/queries";
 import { useProposal } from "@/hooks/proposal/queries";
 import { useRequirements } from "@/hooks/requirements/queries";
@@ -55,6 +57,10 @@ function NavItemBadge({
 
 function AppSidebar({ onLogout }: AppSidebarProps) {
   const nav = LABELS.NAV;
+  const { isAuthenticated } = useAuth();
+  const { data: currentUser } = useCurrentUser(isAuthenticated);
+  const userName = currentUser?.name ?? nav.USER_NAME;
+  const userEmail = currentUser?.email ?? "";
   const { projectId } = useProject();
   const { data: requirements, isLoading: isRequirementsLoading } =
     useRequirements(projectId);
@@ -138,13 +144,13 @@ function AppSidebar({ onLogout }: AppSidebarProps) {
       <div className="border-t border-slate-800 px-3 py-3">
         <div className="flex items-center gap-3">
           <div className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-500 text-sm font-semibold text-white">
-            {getInitials(nav.USER_NAME)}
+            {getInitials(userName)}
           </div>
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-medium text-white">
-              {nav.USER_NAME}
+              {userName}
             </p>
-            <p className="truncate text-xs text-slate-500">{nav.USER_ROLE}</p>
+            <p className="truncate text-xs text-slate-500">{userEmail}</p>
           </div>
           <button
             type="button"
