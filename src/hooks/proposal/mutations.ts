@@ -47,3 +47,23 @@ export function useUpdateProposal() {
     },
   });
 }
+
+/**
+ * Requests an AI-generated edit of the proposal. Returns the diff so the caller
+ * can preview `proposed` before committing it via {@link useUpdateProposal} — so
+ * this neither toasts on success nor invalidates the cached proposal.
+ */
+export function useAiEditProposal() {
+  return useMutation({
+    mutationFn: ({
+      projectId,
+      instruction,
+    }: {
+      projectId: string;
+      instruction: string;
+    }) => proposalApi.aiEdit(projectId, { instruction }),
+    onError: (error: Error) => {
+      toast.error(getErrorMessage(error, LABELS.PROPOSAL.API.AI_EDIT_ERROR));
+    },
+  });
+}

@@ -25,6 +25,8 @@ interface ProposalHeaderProps {
   canGenerate: boolean;
   onGenerate: () => void;
   onExport: () => void;
+  projectId: string;
+  projectName?: string;
 }
 
 /** Top action row: generation status plus edit / export / generate controls. */
@@ -36,6 +38,8 @@ function ProposalHeader({
   canGenerate,
   onGenerate,
   onExport,
+  projectId,
+  projectName,
 }: ProposalHeaderProps) {
   const [isAskAiOpen, setIsAskAiOpen] = useState(false);
 
@@ -87,7 +91,12 @@ function ProposalHeader({
         )}
       </div>
 
-      <AskAiDialog open={isAskAiOpen} onOpenChange={setIsAskAiOpen} />
+      <AskAiDialog
+        open={isAskAiOpen}
+        onOpenChange={setIsAskAiOpen}
+        projectId={projectId}
+        projectName={projectName}
+      />
     </div>
   );
 }

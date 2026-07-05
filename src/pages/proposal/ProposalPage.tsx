@@ -147,6 +147,8 @@ function ProposalContent({ projectId, projectName }: ProposalContentProps) {
         canGenerate={hasRequirements}
         onGenerate={generate}
         onExport={handleExport}
+        projectId={projectId}
+        projectName={projectName}
       />
 
       <ProposalBody

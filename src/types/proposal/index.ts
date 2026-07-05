@@ -6,10 +6,8 @@ import type { StatusTone } from "@/types/common";
 /* API contract (server wire shapes — snake_case, bare responses)             */
 /* -------------------------------------------------------------------------- */
 
-/** A generated proposal as returned by `GET /projects/{id}/proposal`. */
-export interface ProposalResponse {
-  id: string;
-  project_id: string;
+/** The editable content of a proposal — shared by the full response and the AI-edit diff. */
+export interface ProposalContent {
   executive_summary: string | null;
   technical_approach: string | null;
   architecture: Record<string, unknown>;
@@ -19,6 +17,12 @@ export interface ProposalResponse {
   risks: unknown[];
   total_cost_usd: number | null;
   total_days: number | null;
+}
+
+/** A generated proposal as returned by `GET /projects/{id}/proposal`. */
+export interface ProposalResponse extends ProposalContent {
+  id: string;
+  project_id: string;
   status: string;
 }
 
@@ -58,6 +62,20 @@ export interface ProposalUpdate {
   cost_breakdown?: unknown[] | null;
   risks?: unknown[] | null;
   status?: string | null;
+}
+
+/** Body for `POST /projects/{id}/proposal/ai-edit`. */
+export interface AiEditProposalDto {
+  instruction: string;
+}
+
+/** Diff returned by the AI-edit endpoint — `proposed` is the AI-updated content. */
+export interface ProposalAiEditResponse {
+  artifact_type: string;
+  artifact_id: string;
+  change_summary: string;
+  current: ProposalContent;
+  proposed: ProposalContent;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -330,4 +348,25 @@ export function toProposal(response: ProposalResponse): Proposal {
         ? L.COST_BREAKDOWN.TOTAL_DAYS_VALUE(totalDays)
         : L.COST_BREAKDOWN.PENDING,
   };
+}
+
+/** Maps AI-edit content into the `PUT /proposal` body (content fields only). */
+export function toProposalUpdate(content: ProposalContent): ProposalUpdate {
+  return {
+    executive_summary: content.executive_summary,
+    technical_approach: content.technical_approach,
+    architecture: content.architecture,
+    team_composition: content.team_composition,
+    timeline: content.timeline,
+    cost_breakdown: content.cost_breakdown,
+    risks: content.risks,
+  };
+}
+
+/**
+ * Builds a `Proposal` view-model from bare AI-edit content for previewing. The
+ * placeholder id/project_id/status aren't rendered by `ProposalDocument`.
+ */
+export function toProposalPreview(content: ProposalContent): Proposal {
+  return toProposal({ ...content, id: "", project_id: "", status: "draft" });
 }

@@ -2,6 +2,8 @@ import api from "@/services/api";
 import { ENDPOINTS } from "@/constants/endpoints";
 
 import type {
+  AiEditProposalDto,
+  ProposalAiEditResponse,
   ProposalGenerationTask,
   ProposalResponse,
   ProposalTaskStatus,
@@ -30,5 +32,13 @@ export const proposalApi = {
   ): Promise<ProposalResponse> =>
     api
       .put<ProposalResponse>(ENDPOINTS.PROPOSAL.DETAIL(projectId), data)
+      .then((r) => r.data),
+
+  aiEdit: (
+    projectId: string,
+    data: AiEditProposalDto,
+  ): Promise<ProposalAiEditResponse> =>
+    api
+      .post<ProposalAiEditResponse>(ENDPOINTS.PROPOSAL.AI_EDIT(projectId), data)
       .then((r) => r.data),
 };
