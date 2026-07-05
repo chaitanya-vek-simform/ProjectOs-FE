@@ -7,7 +7,7 @@ import type { Milestone } from "@/types/dashboard";
 
 const MILESTONE_LABELS = LABELS.DASHBOARD.MILESTONES;
 
-function MilestoneRow({ milestone }: { milestone: Milestone }) {
+function MilestoneRow({ milestone }: { readonly milestone: Milestone }) {
   return (
     <li>
       <div className="mb-1.5 flex items-center justify-between gap-2">
@@ -27,14 +27,25 @@ function MilestoneRow({ milestone }: { milestone: Milestone }) {
   );
 }
 
-function MilestoneTracker() {
+interface MilestoneTrackerProps {
+  readonly milestones?: typeof MILESTONES;
+}
+
+function MilestoneTracker({
+  milestones = MILESTONES,
+}: MilestoneTrackerProps) {
+  // Don't render if no data
+  if (!milestones || milestones.length === 0) {
+    return null;
+  }
+
   return (
     <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
       <h3 className="mb-4 text-sm font-semibold text-slate-900">
         {MILESTONE_LABELS.TITLE}
       </h3>
       <ul className="space-y-4">
-        {MILESTONES.map((milestone) => (
+        {milestones.map((milestone) => (
           <MilestoneRow key={milestone.id} milestone={milestone} />
         ))}
       </ul>

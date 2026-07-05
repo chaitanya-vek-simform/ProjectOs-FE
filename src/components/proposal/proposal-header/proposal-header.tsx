@@ -31,8 +31,10 @@ interface ProposalHeaderProps {
   readonly onExport: () => void;
   /** Toggles edit mode; when already editing, this acts as "Save". */
   readonly onToggleEdit: () => void;
-  projectId: string;
-  projectName?: string;
+  /** Discards edits and exits edit mode. */
+  readonly onCancel: () => void;
+  readonly projectId: string;
+  readonly projectName?: string;
 }
 
 /** Top action row: generation status plus edit / export / generate controls. */
@@ -47,6 +49,7 @@ function ProposalHeader({
   onGenerate,
   onExport,
   onToggleEdit,
+  onCancel,
   projectId,
   projectName,
 }: ProposalHeaderProps) {
@@ -90,6 +93,11 @@ function ProposalHeader({
               )}
               {editToggleLabel}
             </Button>
+            {isEditing && (
+              <Button variant="outline" disabled={isSaving} onClick={onCancel}>
+                {EDIT.CANCEL_BUTTON}
+              </Button>
+            )}
           </>
         )}
         <Button

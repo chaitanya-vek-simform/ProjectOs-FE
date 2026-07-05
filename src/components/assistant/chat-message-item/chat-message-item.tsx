@@ -25,7 +25,7 @@ function ChatMessageItem({ message }: ChatMessageItemProps) {
   return (
     <div
       className={cn(
-        "flex w-full items-start gap-2",
+        "flex min-w-0 items-start gap-2",
         isUser ? "flex-row-reverse" : "flex-row",
       )}
       aria-label={isUser ? MESSAGE.USER_ARIA : MESSAGE.ASSISTANT_ARIA}
@@ -42,16 +42,16 @@ function ChatMessageItem({ message }: ChatMessageItemProps) {
 
       <div
         className={cn(
-          "flex max-w-[80%] flex-col",
+          "flex min-w-0 max-w-sm flex-col",
           isUser ? "items-end" : "items-start",
         )}
       >
         <div
           className={cn(
-            "rounded-2xl px-3 py-2 text-sm leading-relaxed break-words",
+            "min-w-0 max-w-sm rounded-2xl px-3 py-2 text-sm leading-relaxed overflow-hidden",
             isUser
-              ? "bg-indigo-600 whitespace-pre-wrap text-white"
-              : "bg-slate-100 text-slate-900",
+              ? "bg-indigo-600 whitespace-pre-wrap text-white break-words"
+              : "bg-slate-100 text-slate-900 break-words",
           )}
         >
           {isPending ? (

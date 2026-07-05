@@ -70,7 +70,7 @@ function ChatWindow({
     <div
       role="dialog"
       aria-label={WINDOW.TITLE}
-      className="fixed inset-0 z-50 flex flex-col bg-white shadow-2xl sm:inset-auto sm:right-6 sm:bottom-24 sm:h-[min(600px,calc(100vh-8rem))] sm:w-96 sm:rounded-2xl sm:border sm:border-slate-200"
+      className="fixed inset-0 z-50 flex flex-col bg-white shadow-2xl sm:inset-auto sm:right-6 sm:bottom-24 sm:h-[min(600px,calc(100vh-8rem))] sm:w-[460px] sm:rounded-2xl sm:border sm:border-slate-200"
     >
       <header className="flex items-center gap-3 border-b border-slate-200 px-4 py-3">
         <span
@@ -129,7 +129,7 @@ function ChatWindow({
 
       <div
         ref={scrollRef}
-        className="flex-1 space-y-4 overflow-y-auto px-4 py-4"
+        className="flex-1 space-y-4 overflow-y-auto overflow-x-hidden px-4 py-4 min-w-0"
       >
         {isLoadingHistory && messages.length === 0 ? (
           <div className="flex h-full flex-col items-center justify-center gap-2 text-center">

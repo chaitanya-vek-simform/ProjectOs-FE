@@ -73,7 +73,6 @@ function DocumentsTable({
             <TableHead>{L.COLUMN_TYPE}</TableHead>
             <TableHead>{L.COLUMN_UPLOADED}</TableHead>
             <TableHead>{L.COLUMN_STATUS}</TableHead>
-            <TableHead>{L.COLUMN_ACTION}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>

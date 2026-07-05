@@ -16,9 +16,18 @@ import { LABELS } from "@/constants/labels";
 
 const BURNDOWN = LABELS.DASHBOARD.BURNDOWN;
 
-function BurndownChart() {
+interface BurndownChartProps {
+  readonly data?: typeof BURNDOWN_DATA;
+}
+
+function BurndownChart({ data = BURNDOWN_DATA }: BurndownChartProps) {
+  // Don't render if no data
+  if (!data || data.length === 0) {
+    return null;
+  }
+
   return (
-    <div className="col-span-2 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+    <div className="lg:col-span-2 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
       <div className="mb-4 flex items-start justify-between">
         <div>
           <h3 className="text-sm font-semibold text-slate-900">
@@ -30,7 +39,7 @@ function BurndownChart() {
       </div>
       <ResponsiveContainer width="100%" height={200}>
         <ComposedChart
-          data={BURNDOWN_DATA}
+          data={data}
           margin={{ top: 8, right: 8, left: -16, bottom: 0 }}
         >
           <CartesianGrid

@@ -24,7 +24,7 @@ const TONE_CONFIG: Record<
   emerald: { icon: CheckCircle2, className: "bg-emerald-100 text-emerald-600" },
 };
 
-function ActivityRow({ item }: { item: ActivityItem }) {
+function ActivityRow({ item }: { readonly item: ActivityItem }) {
   const { icon: Icon, className } = TONE_CONFIG[item.tone];
   return (
     <li className="flex items-start gap-3">
@@ -52,14 +52,25 @@ function ActivityRow({ item }: { item: ActivityItem }) {
   );
 }
 
-function RecentActivity() {
+interface RecentActivityProps {
+  readonly items?: typeof ACTIVITY_ITEMS;
+}
+
+function RecentActivity({
+  items = ACTIVITY_ITEMS,
+}: RecentActivityProps) {
+  // Don't render if no data
+  if (!items || items.length === 0) {
+    return null;
+  }
+
   return (
-    <div className="col-span-2 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+    <div className="lg:col-span-2 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
       <h3 className="mb-4 text-sm font-semibold text-slate-900">
         {ACTIVITY.TITLE}
       </h3>
       <ul className="space-y-4">
-        {ACTIVITY_ITEMS.map((item) => (
+        {items.map((item) => (
           <ActivityRow key={item.id} item={item} />
         ))}
       </ul>

@@ -13,7 +13,16 @@ import { LABELS } from "@/constants/labels";
 
 const VELOCITY = LABELS.DASHBOARD.VELOCITY;
 
-function VelocityChart() {
+interface VelocityChartProps {
+  readonly data?: typeof VELOCITY_DATA;
+}
+
+function VelocityChart({ data = VELOCITY_DATA }: VelocityChartProps) {
+  // Don't render if no data
+  if (!data || data.length === 0) {
+    return null;
+  }
+
   return (
     <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
       <div className="mb-4">
@@ -24,7 +33,7 @@ function VelocityChart() {
       </div>
       <ResponsiveContainer width="100%" height={200}>
         <BarChart
-          data={VELOCITY_DATA}
+          data={data}
           margin={{ top: 8, right: 8, left: -16, bottom: 0 }}
         >
           <XAxis
@@ -40,7 +49,7 @@ function VelocityChart() {
           />
           <Tooltip cursor={{ fill: "#f1f5f9" }} />
           <Bar dataKey="points" radius={[6, 6, 0, 0]} maxBarSize={56}>
-            {VELOCITY_DATA.map((entry) => (
+            {data.map((entry) => (
               <Cell key={entry.label} fill={entry.color} />
             ))}
           </Bar>

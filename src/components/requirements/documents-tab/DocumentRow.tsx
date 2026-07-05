@@ -1,8 +1,6 @@
 import { Loader2 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
-import { useProcessDocument } from "@/hooks/requirements/mutations";
-import { Button } from "@/components/ui/button";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { StatusBadge } from "@/components/common/status-badge/status-badge";
 
@@ -18,57 +16,13 @@ const TILE_TONE_CLASSES: Record<DocumentTileTone, string> = {
 };
 
 interface DocumentRowProps {
-  document: RequirementDocument;
-  projectId: string | undefined;
-  documentId: string;
-}
-
-interface DocumentActionProps {
-  document: RequirementDocument;
-  onProcess: () => void;
-  isPending: boolean;
-  disabled: boolean;
-}
-
-function DocumentAction({
-  document,
-  onProcess,
-  isPending,
-  disabled,
-}: DocumentActionProps) {
-  const canProcess =
-    document.status === "uploaded" || document.status === "failed";
-
-  if (canProcess) {
-    return (
-      <Button
-        type="button"
-        variant="link"
-        className="h-auto p-0 text-sm text-indigo-600"
-        disabled={isPending || disabled}
-        onClick={onProcess}
-      >
-        {document.actionLabel}
-      </Button>
-    );
-  }
-
-  if (document.actionDisabled) {
-    return (
-      <span className="text-sm text-slate-400">{document.actionLabel}</span>
-    );
-  }
-
-  // A processed document has no follow-up action to surface.
-  return null;
+  readonly document: RequirementDocument;
+  readonly projectId?: string;
+  readonly documentId?: string;
 }
 
 /** A single row in the uploaded-documents table. */
-function DocumentRow({ document, projectId, documentId }: DocumentRowProps) {
-  const { mutate: processDocument, isPending } = useProcessDocument(
-    projectId ?? "",
-  );
-
+function DocumentRow({ document }: DocumentRowProps) {
   return (
     <TableRow>
       <TableCell>
@@ -99,14 +53,6 @@ function DocumentRow({ document, projectId, documentId }: DocumentRowProps) {
             {document.statusLabel}
           </span>
         </StatusBadge>
-      </TableCell>
-      <TableCell>
-        <DocumentAction
-          document={document}
-          onProcess={() => processDocument(documentId)}
-          isPending={isPending}
-          disabled={!projectId}
-        />
       </TableCell>
     </TableRow>
   );

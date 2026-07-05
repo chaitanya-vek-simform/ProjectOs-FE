@@ -53,11 +53,11 @@ function DashboardPage() {
   return (
     <div className="space-y-6">
       <DashboardStatsRow />
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <BurndownChart />
         <VelocityChart />
       </div>
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <RecentActivity />
         <MilestoneTracker />
       </div>

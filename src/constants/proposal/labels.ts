@@ -32,6 +32,7 @@ export const PROPOSAL_LABELS = {
     EDIT_BUTTON: "Edit",
     SAVE_BUTTON: "Save",
     SAVING: "Saving…",
+    CANCEL_BUTTON: "Cancel",
     REMOVE_ROW_ARIA: "Remove row",
     ARCHITECTURE_RATIONALE_LABEL: "Rationale",
     ARCHITECTURE_COMPONENT_NAME_PLACEHOLDER: "Component name",

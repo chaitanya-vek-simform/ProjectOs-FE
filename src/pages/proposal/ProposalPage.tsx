@@ -166,6 +166,10 @@ function ProposalContent({ projectId, projectName }: ProposalContentProps) {
     );
   };
 
+  const handleCancel = () => {
+    setDraft(undefined);
+  };
+
   return (
     <div className="space-y-5">
       <ProposalHeader
@@ -177,6 +181,7 @@ function ProposalContent({ projectId, projectName }: ProposalContentProps) {
         isEditing={draft !== undefined}
         isSaving={updateProposal.isPending}
         onToggleEdit={handleToggleEdit}
+        onCancel={handleCancel}
         onGenerate={generate}
         onExport={handleExport}
         projectId={projectId}
