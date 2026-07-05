@@ -24,7 +24,6 @@ interface ProposalHeaderProps {
   /** False when the project has no requirements — generation is disabled. */
   canGenerate: boolean;
   onGenerate: () => void;
-  isExporting: boolean;
   onExport: () => void;
 }
 
@@ -36,7 +35,6 @@ function ProposalHeader({
   isGenerating,
   canGenerate,
   onGenerate,
-  isExporting,
   onExport,
 }: ProposalHeaderProps) {
   const [isAskAiOpen, setIsAskAiOpen] = useState(false);
@@ -56,17 +54,9 @@ function ProposalHeader({
         >
           {HEADER.EDIT}
         </Button>
-        <Button
-          variant="outline"
-          disabled={!hasProposal || isExporting}
-          onClick={onExport}
-        >
-          {isExporting ? (
-            <Loader2 className="animate-spin" aria-hidden="true" />
-          ) : (
-            <Download aria-hidden="true" />
-          )}
-          {isExporting ? HEADER.EXPORTING : HEADER.EXPORT}
+        <Button variant="outline" disabled={!hasProposal} onClick={onExport}>
+          <Download aria-hidden="true" />
+          {HEADER.EXPORT}
         </Button>
         {!hasProposal && (
           <TooltipProvider>

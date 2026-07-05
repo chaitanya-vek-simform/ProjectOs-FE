@@ -1,7 +1,6 @@
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import { isAxiosError } from "axios";
 import { FileText, FolderKanban, Loader2 } from "lucide-react";
-import { toast } from "sonner";
 
 import { ProposalDocument } from "@/components/proposal/proposal-document/proposal-document";
 import { ProposalHeader } from "@/components/proposal/proposal-header/proposal-header";
@@ -10,7 +9,6 @@ import { useProject } from "@/contexts/useProject";
 import { useGenerateProposal } from "@/hooks/proposal/mutations";
 import { useProposal } from "@/hooks/proposal/queries";
 import { useRequirements } from "@/hooks/requirements/queries";
-import { exportElementToPdf } from "@/lib/pdf";
 import { getErrorMessage } from "@/lib/utils";
 import {
   isProposalInProgress,
@@ -56,7 +54,7 @@ function ProposalBody({
 }: ProposalBodyProps) {
   if (proposal) {
     return (
-      <div ref={documentRef}>
+      <div ref={documentRef} data-proposal-print>
         <ProposalDocument proposal={proposal} projectName={projectName} />
       </div>
     );
@@ -114,7 +112,6 @@ interface ProposalContentProps {
 /** Data-wiring container for a resolved project: proposal fetch, generation, and states. */
 function ProposalContent({ projectId, projectName }: ProposalContentProps) {
   const documentRef = useRef<HTMLDivElement>(null);
-  const [isExporting, setIsExporting] = useState(false);
 
   const generateProposal = useGenerateProposal();
   const {
@@ -130,18 +127,11 @@ function ProposalContent({ projectId, projectName }: ProposalContentProps) {
     generateProposal.mutate(projectId);
   };
 
-  const handleExport = async () => {
+  const handleExport = () => {
     if (!documentRef.current) return;
-    setIsExporting(true);
-    try {
-      await exportElementToPdf(documentRef.current, projectName ?? projectId);
-    } catch (exportError) {
-      toast.error(
-        getErrorMessage(exportError as Error, PROPOSAL.HEADER.EXPORT_ERROR),
-      );
-    } finally {
-      setIsExporting(false);
-    }
+    // Native browser print — the print stylesheet in index.css isolates the
+    // tagged proposal document so the PDF is a pixel-exact match of the UI.
+    window.print();
   };
 
   const proposal = proposalResponse ? toProposal(proposalResponse) : null;
@@ -160,7 +150,6 @@ function ProposalContent({ projectId, projectName }: ProposalContentProps) {
         isGenerating={displayIsGenerating}
         canGenerate={hasRequirements}
         onGenerate={handleGenerate}
-        isExporting={isExporting}
         onExport={handleExport}
       />
 
