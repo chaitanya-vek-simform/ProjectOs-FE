@@ -72,7 +72,11 @@ function NewTranscriptForm({
 
   const handleSubmit = form.handleSubmit((values) => {
     createMeeting(
-      { title: values.title, raw_transcript: values.raw_transcript },
+      {
+        title: values.title,
+        raw_transcript: values.raw_transcript,
+        meeting_date: new Date().toISOString(),
+      },
       {
         onSuccess: () => {
           form.reset();

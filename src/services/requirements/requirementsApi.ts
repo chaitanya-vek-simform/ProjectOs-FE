@@ -2,7 +2,11 @@ import api from "@/services/api";
 import { ENDPOINTS } from "@/constants/endpoints";
 
 import type {
+  ClarificationAnswersPayload,
+  ClarificationsResponse,
   DocumentResponse,
+  DocumentTaskResponse,
+  DocumentTaskStatus,
   RequirementResponse,
   RequirementUpdate,
   UserStoryResponse,
@@ -14,11 +18,11 @@ export const requirementsApi = {
   uploadDocument: (
     projectId: string,
     file: File,
-  ): Promise<DocumentResponse> => {
+  ): Promise<DocumentTaskResponse> => {
     const formData = new FormData();
     formData.append("file", file);
     return api
-      .post<DocumentResponse>(
+      .post<DocumentTaskResponse>(
         ENDPOINTS.REQUIREMENTS.DOCUMENTS(projectId),
         formData,
       )
@@ -38,6 +42,45 @@ export const requirementsApi = {
       .post<DocumentResponse>(
         ENDPOINTS.REQUIREMENTS.PROCESS_DOCUMENT(projectId, documentId),
       )
+      .then((r) => r.data),
+
+  /* Clarifications */
+  getClarifications: (
+    projectId: string,
+    documentId: string,
+  ): Promise<ClarificationsResponse> =>
+    api
+      .get<ClarificationsResponse>(
+        ENDPOINTS.REQUIREMENTS.CLARIFICATIONS(projectId, documentId),
+      )
+      .then((r) => r.data),
+
+  submitClarifications: (
+    projectId: string,
+    documentId: string,
+    payload: ClarificationAnswersPayload,
+  ): Promise<DocumentTaskResponse> =>
+    api
+      .post<DocumentTaskResponse>(
+        ENDPOINTS.REQUIREMENTS.CLARIFICATION_ANSWERS(projectId, documentId),
+        payload,
+      )
+      .then((r) => r.data),
+
+  skipClarifications: (
+    projectId: string,
+    documentId: string,
+  ): Promise<DocumentTaskResponse> =>
+    api
+      .post<DocumentTaskResponse>(
+        ENDPOINTS.REQUIREMENTS.CLARIFICATION_SKIP(projectId, documentId),
+      )
+      .then((r) => r.data),
+
+  /** Poll an async document task by id (`GET /tasks/{task_id}`). */
+  getTaskStatus: (taskId: string): Promise<DocumentTaskStatus> =>
+    api
+      .get<DocumentTaskStatus>(ENDPOINTS.REQUIREMENTS.TASK_STATUS(taskId))
       .then((r) => r.data),
 
   /* Requirements */

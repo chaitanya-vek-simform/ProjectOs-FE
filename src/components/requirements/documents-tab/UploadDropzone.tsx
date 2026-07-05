@@ -1,9 +1,13 @@
 import { useRef, useState } from "react";
-import { Loader2, UploadCloud, File } from "lucide-react";
+import { Loader2, UploadCloud } from "lucide-react";
 
 import { LABELS } from "@/constants/labels";
 import { useUploadDocument } from "@/hooks/requirements/mutations";
 import { Button } from "@/components/ui/button";
+
+import { DocumentUploadFlowDialog } from "./document-upload-flow/DocumentUploadFlowDialog";
+
+import type { DocumentTaskResponse } from "@/types/requirements";
 
 const L = LABELS.REQUIREMENTS.UPLOAD;
 const TOAST_L = LABELS.REQUIREMENTS.TOAST;
@@ -14,22 +18,22 @@ const ACCEPTED_FORMATS = [
 ];
 const ACCEPTED_EXTENSIONS = [".pdf", ".docx", ".txt"];
 
-interface PendingUpload {
-  id: string;
-  file: File;
-}
-
 interface UploadDropzoneProps {
   projectId: string | undefined;
 }
 
-/** RFP / requirement document upload dropzone with file browser and drag-drop support. */
+/** RFP / requirement document upload dropzone that launches the analysis flow. */
 function UploadDropzone({ projectId }: UploadDropzoneProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [pendingUploads, setPendingUploads] = useState<PendingUpload[]>([]);
   const [dragActive, setDragActive] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { mutate: uploadDocument } = useUploadDocument(projectId ?? "");
+  const [activeTask, setActiveTask] = useState<DocumentTaskResponse | null>(
+    null,
+  );
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const { mutate: uploadDocument, isPending: isUploading } = useUploadDocument(
+    projectId ?? "",
+  );
 
   const validateFile = (file: File): boolean => {
     if (!ACCEPTED_FORMATS.includes(file.type)) {
@@ -43,20 +47,17 @@ function UploadDropzone({ projectId }: UploadDropzoneProps) {
   };
 
   const handleFiles = (files: FileList | null) => {
-    if (!files || !projectId) return;
+    if (!files?.length || !projectId || isUploading) return;
 
     setError(null);
+    const file = files[0];
+    if (!validateFile(file)) return;
 
-    Array.from(files).forEach((file) => {
-      if (!validateFile(file)) return;
-
-      const id = `${file.name}-${file.size}-${file.lastModified}`;
-      setPendingUploads((prev) => [...prev, { id, file }]);
-      uploadDocument(file, {
-        onSettled: () => {
-          setPendingUploads((prev) => prev.filter((item) => item.id !== id));
-        },
-      });
+    uploadDocument(file, {
+      onSuccess: (task) => {
+        setActiveTask(task);
+        setDialogOpen(true);
+      },
     });
   };
 
@@ -108,14 +109,16 @@ function UploadDropzone({ projectId }: UploadDropzoneProps) {
           type="button"
           className="mt-4 bg-indigo-600 text-white hover:bg-indigo-700"
           onClick={handleBrowseClick}
-          disabled={!projectId}
+          disabled={!projectId || isUploading}
         >
+          {isUploading && (
+            <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+          )}
           {L.BROWSE}
         </Button>
         <input
           ref={fileInputRef}
           type="file"
-          multiple
           accept=".pdf,.docx,.txt"
           onChange={handleFileInputChange}
           className="hidden"
@@ -129,33 +132,14 @@ function UploadDropzone({ projectId }: UploadDropzoneProps) {
         </div>
       )}
 
-      {pendingUploads.length > 0 && (
-        <div className="space-y-3">
-          <p className="text-sm font-medium text-slate-700">
-            {LABELS.REQUIREMENTS.DYNAMIC.UPLOADED_COUNT(pendingUploads.length)}
-          </p>
-          <div className="space-y-2">
-            {pendingUploads.map((item) => (
-              <div
-                key={item.id}
-                className="flex items-center justify-between rounded-lg border border-slate-200 bg-slate-50 p-3"
-              >
-                <div className="flex items-center gap-3">
-                  <File className="size-5 text-indigo-600" aria-hidden="true" />
-                  <div className="min-w-0">
-                    <p className="truncate text-sm font-medium text-slate-800">
-                      {item.file.name}
-                    </p>
-                  </div>
-                </div>
-                <Loader2
-                  className="size-4 animate-spin text-slate-400"
-                  aria-hidden="true"
-                />
-              </div>
-            ))}
-          </div>
-        </div>
+      {activeTask && (
+        <DocumentUploadFlowDialog
+          key={activeTask.task_id}
+          open={dialogOpen}
+          projectId={projectId ?? ""}
+          task={activeTask}
+          onOpenChange={setDialogOpen}
+        />
       )}
     </div>
   );

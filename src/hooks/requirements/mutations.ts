@@ -6,7 +6,11 @@ import { LABELS } from "@/constants/labels";
 import { REQUIREMENTS_QUERY_KEYS } from "@/constants/queryKeys";
 import { getErrorMessage } from "@/lib/utils";
 
-import type { RequirementUpdate, UserStoryUpdate } from "@/types/requirements";
+import type {
+  ClarificationAnswersPayload,
+  RequirementUpdate,
+  UserStoryUpdate,
+} from "@/types/requirements";
 
 export function useUploadDocument(projectId: string) {
   const queryClient = useQueryClient();
@@ -39,6 +43,27 @@ export function useProcessDocument(projectId: string) {
       toast.error(
         getErrorMessage(error, LABELS.REQUIREMENTS.API.PROCESS_ERROR),
       );
+    },
+  });
+}
+
+export function useSubmitClarifications(projectId: string, documentId: string) {
+  return useMutation({
+    mutationFn: (payload: ClarificationAnswersPayload) =>
+      requirementsApi.submitClarifications(projectId, documentId, payload),
+    onError: (error: Error) => {
+      toast.error(
+        getErrorMessage(error, LABELS.REQUIREMENTS.API.CLARIFICATION_ERROR),
+      );
+    },
+  });
+}
+
+export function useSkipClarifications(projectId: string, documentId: string) {
+  return useMutation({
+    mutationFn: () => requirementsApi.skipClarifications(projectId, documentId),
+    onError: (error: Error) => {
+      toast.error(getErrorMessage(error, LABELS.REQUIREMENTS.API.SKIP_ERROR));
     },
   });
 }

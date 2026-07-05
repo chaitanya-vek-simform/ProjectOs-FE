@@ -2,12 +2,19 @@ import type { Query } from "@tanstack/react-query";
 
 const POLL_INTERVAL_MS = 10_000;
 
+/**
+ * Statuses that stop list/detail polling. Besides the truly terminal ones,
+ * `awaiting_clarification` is user-gated — it only advances when the user
+ * submits/skips answers (which invalidates the query), so polling it just
+ * hammers the endpoint while the clarification dialog is open.
+ */
 const TERMINAL_STATUSES = new Set([
   "processed",
   "completed",
   "failed",
   "approved",
   "done",
+  "awaiting_clarification",
 ]);
 
 function isPending(status: string | undefined): boolean {
