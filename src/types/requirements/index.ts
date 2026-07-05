@@ -3,6 +3,8 @@ import { LABELS } from "@/constants/labels";
 
 import type { StatusTone } from "@/types/common";
 
+export * from "./documentTasks";
+
 /* -------------------------------------------------------------------------- */
 /* API contract (server wire shapes — snake_case, bare responses)             */
 /* -------------------------------------------------------------------------- */

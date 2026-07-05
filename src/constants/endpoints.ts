@@ -17,6 +17,13 @@ export const ENDPOINTS = {
     DOCUMENTS: (projectId: string) => `/projects/${projectId}/documents`,
     PROCESS_DOCUMENT: (projectId: string, documentId: string) =>
       `/projects/${projectId}/documents/${documentId}/process`,
+    CLARIFICATIONS: (projectId: string, documentId: string) =>
+      `/projects/${projectId}/documents/${documentId}/clarifications`,
+    CLARIFICATION_ANSWERS: (projectId: string, documentId: string) =>
+      `/projects/${projectId}/documents/${documentId}/clarifications/answers`,
+    CLARIFICATION_SKIP: (projectId: string, documentId: string) =>
+      `/projects/${projectId}/documents/${documentId}/clarifications/skip`,
+    TASK_STATUS: (taskId: string) => `/tasks/${taskId}`,
     LIST: (projectId: string) => `/projects/${projectId}/requirements`,
     DETAIL: (requirementId: string) => `/requirements/${requirementId}`,
     GENERATE_STORIES: (projectId: string) =>

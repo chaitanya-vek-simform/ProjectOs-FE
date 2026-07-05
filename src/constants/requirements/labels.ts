@@ -11,6 +11,8 @@ export const REQUIREMENTS_LABELS = {
     GENERATE_STORIES_ERROR: "Failed to start user story generation.",
     STORY_UPDATE_SUCCESS: "User story updated successfully.",
     STORY_UPDATE_ERROR: "Failed to update user story.",
+    CLARIFICATION_ERROR: "Failed to submit your answers.",
+    SKIP_ERROR: "Failed to skip clarifications.",
   },
   TABS: {
     DOCUMENTS: "Documents",
@@ -21,6 +23,39 @@ export const REQUIREMENTS_LABELS = {
     HEADLINE: "Drop your RFP or requirement document here",
     HINT: "PDF, DOCX, TXT — up to 50MB",
     BROWSE: "Browse Files",
+  },
+  UPLOAD_FLOW: {
+    DIALOG_TITLE: "Document analysis",
+    UPLOADING_TITLE: "Uploading document…",
+    UPLOADING_DESC: "Sending your file to the server.",
+    ANALYZING_TITLE: "Analyzing document…",
+    ANALYZING_DESC:
+      "We're reading your document to prepare clarification questions. This may take a moment.",
+    QUESTIONS_TITLE: "Clarification questions",
+    QUESTIONS_DESC:
+      "Answer these to improve the generated requirements. You can skip any or all of them.",
+    PROCESSING_TITLE: "Processing document…",
+    PROCESSING_DESC:
+      "Generating requirements from your document and answers. This may take a moment.",
+    DONE_TITLE: "All set!",
+    DONE_DESC:
+      "Your document has been processed. Requirements are now available.",
+    ERROR_TITLE: "Something went wrong",
+    ERROR_DESC:
+      "We couldn't finish processing this document. Please try uploading it again.",
+    SKIP: "Skip all",
+    SUBMIT: "Submit answers",
+    CLOSE: "Close",
+    DONE_BUTTON: "Done",
+    ANSWER_PLACEHOLDER: "Add your own answer (optional)…",
+    RATIONALE_LABEL: "Why we're asking",
+    OTHER_LABEL: "Your answer",
+    STEP_ANALYZE: "Analyze",
+    STEP_QUESTIONS: "Questions",
+    STEP_PROCESS: "Process",
+    QUESTIONS_EMPTY: "No clarification questions for this document.",
+    QUESTIONS_ERROR: "Failed to load clarification questions.",
+    CONTINUE: "Continue",
   },
   DOCUMENTS: {
     COLUMN_FILE: "File",

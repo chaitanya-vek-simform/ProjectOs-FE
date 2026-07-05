@@ -55,3 +55,16 @@ export const userStoryUpdateSchema = z.object({
 });
 
 export type UserStoryUpdateFormValues = z.infer<typeof userStoryUpdateSchema>;
+
+/** Per-question answer: selected option(s) and/or a free-text response. */
+export const clarificationAnswerFieldSchema = z.object({
+  selected: z.array(z.string()),
+  answer_text: z.string(),
+});
+
+/** Clarification form values, keyed by question id. */
+export const clarificationFormSchema = z.object({
+  answers: z.record(z.string(), clarificationAnswerFieldSchema),
+});
+
+export type ClarificationFormValues = z.infer<typeof clarificationFormSchema>;

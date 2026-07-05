@@ -14,6 +14,10 @@ export const PROJECTS_QUERY_KEYS = {
 export const REQUIREMENTS_QUERY_KEYS = {
   DOCUMENTS: (projectId: string) =>
     ["requirements", projectId, "documents"] as const,
+  CLARIFICATIONS: (projectId: string, documentId: string) =>
+    ["requirements", projectId, "clarifications", documentId] as const,
+  TASK_STATUS: (taskId: string) =>
+    ["requirements", "task-status", taskId] as const,
   LIST: (projectId: string, type?: string) =>
     ["requirements", projectId, "list", type ?? "all"] as const,
   STORIES: (projectId: string) =>
