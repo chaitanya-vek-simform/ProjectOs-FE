@@ -18,10 +18,10 @@ export interface RiskFactorMeta {
  */
 export const RISK_FACTOR_META: RiskFactorMeta[] = [
   { key: "overallocation", label: FACTORS.OVERALLOCATION, max: 20 },
-  { key: "velocity_drop", label: FACTORS.VELOCITY_DROP, max: 25 },
+  { key: "velocity_drop", label: FACTORS.VELOCITY_DROP, max: 20 },
   { key: "blocked_tasks", label: FACTORS.BLOCKED_TASKS, max: 20 },
   { key: "milestone_drift", label: FACTORS.MILESTONE_DRIFT, max: 20 },
-  { key: "scope_creep", label: FACTORS.SCOPE_CREEP, max: 15 },
+  { key: "scope_creep", label: FACTORS.SCOPE_CREEP, max: 10 },
   { key: "meeting_risk", label: FACTORS.MEETING_RISK, max: 10 },
 ];
 
